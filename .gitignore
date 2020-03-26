@@ -1,4 +1,8 @@
 venv
+pypi_build
+docs/_build/
+docs/aplanat.rst
+docs/modules.rst
 *.pyd
 *.pyc
 *.so
