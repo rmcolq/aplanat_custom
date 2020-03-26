@@ -31,7 +31,7 @@ deploy:pypi:
         - apt-get update -qq && apt-get install -y -qq
           python3-all-dev python-virtualenv
     script:
-        - make build
+        - make pypi_build/bin/activate
         - source pypi_build/bin/activate
         - twine upload dist/*.tar.gz
     only:
