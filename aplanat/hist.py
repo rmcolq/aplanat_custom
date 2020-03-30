@@ -9,7 +9,8 @@ from aplanat.util import Limiter
 
 def histogram(
         datas, weights=None, names=None, colors=None,
-        normalize=False, bins=30, xlim=(None, None), ylim=(None, None),
+        normalize=False, bins=30, binwidth=None,
+        xlim=(None, None), ylim=(None, None), style='bars',
         **kwargs):
     """Create a histogram plot.
 
@@ -21,6 +22,14 @@ def histogram(
     :param normalize: normalize histogram counts by total weight (across all
         datasets).
     :param bins: number of histogram bins.
+    :param binwidth: overrides `bins`, provide a precise binwidth.
+    :param xlim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param ylim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param style: one of: `bars`, `lines`. `bars` will plot the classical
+        bar histogram with a bar depicting counts per fixed interval. `lines`
+        adapts this to plot a line per dataset rather than bars.
     :param kwargs: kwargs for bokeh figure.
 
     :returns: a bokeh plot.
@@ -49,7 +58,11 @@ def histogram(
     y_lim = Limiter()
     for data in datas:
         x_lim.accumulate(data)
-    bins = np.linspace(x_lim.min, x_lim.max, num=bins)
+    if binwidth is not None:
+        # TODO: add a calculated step on
+        bins = np.arange(x_lim.min, x_lim.max + 1e-10, binwidth)
+    else:
+        bins = np.linspace(x_lim.min, x_lim.max, num=bins)
     if normalize:
         total_weight = sum(sum(x) for x in weights)
 
@@ -69,9 +82,12 @@ def histogram(
             kw['legend_label'] = name
         if color is not None:
             kw['color'] = color
-        p.quad(
-            top=counts, bottom=0, left=edges[:-1], right=edges[1:],
-            alpha=0.6, **kw)
+        if style == 'bars':
+            p.quad(
+                top=counts, bottom=0, left=edges[:-1], right=edges[1:],
+                alpha=0.6, **kw)
+        elif style == 'line':
+            p.line(x=edges[:-1], y=counts, line_width=1.5, **kw)
     x_lim.fix(*xlim)
     y_lim.fix(*ylim)
 

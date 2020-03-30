@@ -58,8 +58,10 @@ def boxplot_series(
 
     :param groups: the grouping variable (the x-axis values).
     :param values: the data for boxplots are drawn (the y-axis values).
-    :param names: names (labels) for lines.
-    :param colors: colours to plot lines.
+    :param xlim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param ylim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
     :param kwargs: kwargs for bokeh figure.
 
     :returns: a bokeh plot.
