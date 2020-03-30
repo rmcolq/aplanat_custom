@@ -16,12 +16,15 @@ def marker_vline(plot, x, label=None, color='black', width=1.5):
     :returns: updated plot.
 
     """
-    ymax = plot.y_range.end
     vline = Span(
         location=x, dimension='height',
         line_color=color, line_width=width)
     plot.renderers.extend([vline])
     if label is not None:
+        ymax = plot.y_range.end
+        if ymax is None:
+            raise ValueError(
+                "Please set plot.y_range before adding a vline with text.")
         plot.text(
             x=[x], y=[0.5 * ymax], angle=np.pi / 2, text=[label])
     return plot

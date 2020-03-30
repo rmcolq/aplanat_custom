@@ -1,6 +1,7 @@
 """Utility functions for aiding plotting."""
 
 import numpy as np
+from scipy import stats as sp_stats
 
 
 class Limiter(object):
@@ -42,3 +43,25 @@ def pad(data):
     uniq = sorted(np.unique(data))
     pad = 0.5 * min(np.ediff1d(uniq))
     return uniq[0] - pad, uniq[-1] + pad
+
+
+def kernel_density_estimate(x, step=0.2):
+    """Kernel density to approximate distribution.
+
+    :param x: data of which to find mode.
+    :param step: discretization of KDE PDF.
+    """
+    # estimate bandwidth of kde, R's nrd0 rule-of-thumb
+    hi = np.std(x, ddof=1)
+    q75, q25 = np.percentile(x, [75, 25])
+    iqr = q75 - q25
+    lo = min(hi, iqr/1.34)
+    if not ((lo == hi) or (lo == abs(x[0])) or (lo == 1)):
+        lo = 1
+    bw = 0.9 * lo * len(x)**-0.2
+
+    # create a KDE
+    x_grid = np.arange(min(x), max(x), step)
+    kernel = sp_stats.gaussian_kde(x, bw_method=bw)
+    pdf = kernel(x_grid)
+    return x_grid, pdf

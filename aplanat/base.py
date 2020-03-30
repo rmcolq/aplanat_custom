@@ -65,6 +65,8 @@ def simple(
             p.line(x=x, y=y, line_width=1.5, **kw)
         elif style == 'points':
             p.circle(x=x, y=y, alpha=0.4, **kw)
+        else:
+            raise ValueError('Unknown plot style: "{}"'.format(style))
     x_lim.fix(*xlim)
     y_lim.fix(*ylim)
 
