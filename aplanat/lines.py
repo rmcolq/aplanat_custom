@@ -29,5 +29,5 @@ def line(
     """
     return simple(
         x_datas, y_datas, names=names, colors=colors,
-        xlim=xlim, ylim=ylim, style='lines',
+        xlim=xlim, ylim=ylim, style='line',
         **kwargs)
