@@ -1,5 +1,5 @@
 # aplanat requirements. 
 # Add comments to keep track of why we are using particular versions
-bokeh>=2.0.0
+bokeh
 numpy
-pandas>=1.0.3
+pandas

@@ -1,13 +1,13 @@
-"""Creation of line plots."""
+"""Plotting points."""
 
 from aplanat.base import simple
 
 
-def line(
+def points(
         x_datas, y_datas, names=None, colors=None,
         xlim=(None, None), ylim=(None, None),
         **kwargs):
-    """Create a simple line plot.
+    """Create a simple scatter plot.
 
     :param x_datas: a list of datasets, each item containing the
         data for that set.
@@ -29,5 +29,5 @@ def line(
     """
     return simple(
         x_datas, y_datas, names=names, colors=colors,
-        xlim=xlim, ylim=ylim, style='lines',
+        xlim=xlim, ylim=ylim, style='points',
         **kwargs)
