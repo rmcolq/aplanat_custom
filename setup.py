@@ -16,6 +16,13 @@ __pkg_name__ = 'aplanat'
 __author__ = 'cwright'
 __description__ = 'Bokeh plotting API.'
 
+# Use readme as long description and say its github-flavour markdown
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+kwargs = {'encoding':'utf-8'} if sys.version_info.major == 3 else {}
+with open(path.join(this_directory, 'README.md'), **kwargs) as f:
+    __long_description__ = f.read()
+__long_description_content_type__ = 'text/markdown'
 
 __path__ = os.path.dirname(__file__)
 __pkg_path__ = os.path.join(os.path.join(__path__, __pkg_name__))
