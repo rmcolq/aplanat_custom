@@ -51,6 +51,28 @@ def single_hbar(values, classes, colors, **kwargs):
     return p
 
 
+def simple_bar(
+        groups, counts, **kwargs):
+    """Create a simple barplot.
+
+    :param groups: the grouping variable (the x-axis values).
+    :param values: the data for bars are drawn (the y-axis values).
+    :param kwargs: kwargs for bokeh figure.
+
+    """
+    defaults = {
+        'output_backend': 'webgl',
+        'plot_height': 300, 'plot_width': 600}
+    defaults.update(kwargs)
+    p = figure(
+        x_range=groups,
+        **defaults)
+    p.vbar(x=groups, top=counts, width=0.9)
+    p.xgrid.grid_line_color = None
+    p.y_range.start = 0
+    return p
+
+
 def boxplot_series(
         groups, values, xlim=(None, None), ylim=(None, None),
         **kwargs):

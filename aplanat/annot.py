@@ -30,6 +30,32 @@ def marker_vline(plot, x, label=None, color='black', width=1.5):
     return plot
 
 
+def marker_hline(plot, y, label=None, color='black', width=1.5):
+    """Add a horizontal line to a plot with optional label.
+
+    :param plot: a bokeh plot instance.
+    :param y: the y-axis value where the line should be added.
+    :param label: text label.
+    :param color: colour for line.
+    :param width: line width.
+
+    :returns: updated plot.
+
+    """
+    hline = Span(
+        location=y, dimension='width',
+        line_color=color, line_width=width)
+    plot.renderers.extend([hline])
+    if label is not None:
+        xmax = plot.x_range.end
+        if xmax is None:
+            raise ValueError(
+                "Please set plot.x_range before adding a hline with text.")
+        plot.text(
+            x=[0.5 * xmax], y=[y], angle=0, text=[label])
+    return plot
+
+
 def subtitle(plot, subtitle):
     """Add a subtitle to a plot.
 
