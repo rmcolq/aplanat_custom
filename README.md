@@ -49,13 +49,18 @@ having computed the transform of the data):
     plot = lines.line([x_grid], [pdf])
     aplanat.show(plot)  # to show the plot in a notebook
 
+To add axis and plot titles:
+
+    plot = lines.line(...,
+       title='Chart title', x_axis_label='x-axis', y_axis_label='y-axis')
+
 To plot multiple series just extend the lists given to the arguments (this
 time using points):
 
-   from aplanat import points
-   x0, y0 = [...], [...]
-   x1, y1 = [...], [...]
-   plot = points.points([x0, x1], [y0, y1])
+    from aplanat import points
+    x0, y0 = [...], [...]
+    x1, y1 = [...], [...]
+    plot = points.points([x0, x1], [y0, y1])
 
 Plotting a histogram:
 
