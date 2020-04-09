@@ -54,6 +54,8 @@ setup(
     author=__author__,
     author_email='{}@nanoporetech.com'.format(__author__),
     description=__description__,
+    long_description=__long_description__,
+    long_description_content_type=__long_description_content_type__,
     dependency_links=[],
     ext_modules=extensions,
     install_requires=install_requires,
