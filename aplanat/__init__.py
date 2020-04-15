@@ -5,13 +5,15 @@ import os
 
 import bokeh.io as bkio
 from bokeh.layouts import gridplot
-from bokeh.model import Model, Range1d
+from bokeh.model import Model
+from bokeh.models import Range1d
 from bokeh.models.annotations import Label
 from bokeh.plotting import figure
 import fontawesome.icons as fontawesome
 from pkg_resources import resource_filename
+from si_prefix import si_format
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 
 def with_fontawesome(f):
@@ -33,7 +35,7 @@ def with_fontawesome(f):
 
             __implementation__ = resource_filename(
                 "aplanat", "fontawesome_icon.ts")
-            __dependencies__ = {"font-awesome": "^4.6.3"}
+            __dependencies__ = {"@fortawesome/fontawesome-free": "^5.0.13"}
 
         f(*args, **kwargs)
         os.chdir(wd)
@@ -88,18 +90,49 @@ def grid(plots, ncol=4, **kwargs):
     show(plot)
 
 
+class InfoGraphItems(dict):
+    """Helper class to cumulatively create items for and infographic."""
+
+    def append(self, label, value, icon, unit=''):
+        """Add an item.
+
+        :param label: infographic item label.
+        :param value: numerical value of headline number (without SI units).
+        :param icon: font-awesome icon to use.
+        :param unit: additional suffix after SI unit suffix, e.g. "bases".
+
+        """
+        self[label] = (label, value, unit, icon)
+
+    def extend(self, items):
+        """Add multiple items at once.
+
+        :param items: iterable of 4-tuples, as required by `.add()`.
+        """
+        for i in items:
+            self.append(*i)
+
+
 @with_fontawesome
-def infographic(items, ncol=4):
+def infographic(items, ncol=4, **kwargs):
     """Create and infographic 'plot'.
 
-    :param items: 3-tuples of (label, value, icon); the label should be
+    :param items: 3-tuples of (label, value, unit, icon); the label should be
         a one or two word description, the value the headline number, and the
-        icon the name of a fontawesome icon.
+        icon the name of a fontawesome icon. `value` should be numeric, it
+        will be normalised by use of an SI suffix for display after which
+        `unit` will be appended.
     :param ncol: number of columns in grid of items.
+    :param kwargs: kwargs for bokeh gridplot.
 
     """
     plots = list()
-    for label, value, icon in items:
+    seen = set()
+    for label, value, unit, icon in items:
+        if label in seen:
+            continue
+        value = si_format(value) + unit
+        seen.add(label)
         p = figure(
             plot_width=175, plot_height=100,
             title=None, toolbar_location=None)
@@ -122,4 +155,6 @@ def infographic(items, ncol=4):
                 x=0.65, y=0.4, text=fontawesome[icon], text_color="#6BAED6",
                 text_font="FontAwesome", text_font_size="48px"))
         plots.append(p)
-    grid(plots, ncol=ncol, toolbar_location=None)
+    defaults = {'toolbar_location': None}
+    defaults.update(kwargs)
+    grid(plots, ncol=ncol, **defaults)

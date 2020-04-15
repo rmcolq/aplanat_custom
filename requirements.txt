@@ -5,3 +5,4 @@ fontawesome
 numpy
 pandas
 scipy
+si-prefix
