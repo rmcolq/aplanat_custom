@@ -5,6 +5,8 @@ from bokeh.palettes import Blues9
 from bokeh.plotting import figure
 from bokeh.transform import linear_cmap, log_cmap
 from bokeh.util.hex import hexbin
+import numpy as np
+import pandas as pd
 
 from aplanat import util
 
@@ -56,6 +58,75 @@ def heatmap(x, y, z, name=None, **kwargs):
     ybounds = util.pad(data['y'])
     p.x_range = Range1d(start=xbounds[0], end=xbounds[1], bounds=xbounds)
     p.y_range = Range1d(start=ybounds[0], end=ybounds[1], bounds=ybounds)
+    return p
+
+
+def heatmap2(
+        x, y, name=None, x_bins=50, y_bins=50, log=False,
+        xlim=(None, None), ylim=(None, None), **kwargs):
+    """Create a heatmap from two columns, using integrate binning.
+
+    In contrast to `heatmap` which takes coordinates and counts, this function
+    takes only coordinates and will count observations within bins.
+
+    :param x: x-axis coordinates.
+    :param y: y-axis coordinates.
+    :param name: title for z-axis.
+    :param x_bins: number of bins in x-direction.
+    :param y_bins: number of bins in y-direction.
+    :param xlim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param ylim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param log: use a log-scaled colour map.
+
+    :param kwargs: kwargs for bokeh figure.
+
+    :returns: a bokeh plot.
+
+    """
+    hist, x_edges, y_edges = np.histogram2d(x, y, bins=(x_bins, y_bins))
+    table = np.empty(
+        x_bins * y_bins,
+        dtype=[('row', float), ('col', float), ('value', float)])
+    table['value'] = hist.flatten()
+    table['row'] = np.repeat(x_edges[:x_bins], y_bins)
+    table['col'] = np.tile(y_edges[:y_bins], x_bins)
+    table = pd.DataFrame(table)
+
+    defaults = {
+        "output_backend": "webgl",
+        "height": 300, "width": 600}
+    defaults.update(kwargs)
+    p = figure(**defaults)
+    # define a colour map
+    cmap = log_cmap if log else linear_cmap
+    mapper = cmap('counts', 'Viridis256', 0, max(table['value']))
+    # plot heatmap rectangles
+    width = (x_edges[-1] - x_edges[0]) / x_bins
+    height = (y_edges[-1] - y_edges[0]) / y_bins
+    p.rect(
+        x="row", y="col", source=table,
+        height=height * 1.05, width=width * 1.05,  # fudge to hide artefacts
+        fill_color={'field': 'value', 'transform': mapper['transform']},
+        line_color=None)
+    # add colour scale
+    color_bar = ColorBar(
+        title=name, color_mapper=mapper['transform'], label_standoff=10,
+        location=(0, 0))
+    p.add_layout(color_bar, 'right')
+    # hide some plotting artefacts
+    p.x_range.range_padding = 0
+    p.y_range.range_padding = 0
+    # set up the axes
+    xbounds = util.pad(x_edges[:x_bins])
+    ybounds = util.pad(y_edges[:y_bins])
+    x_lim = util.Limiter().accumulate(xbounds).fix(*xlim)
+    y_lim = util.Limiter().accumulate(ybounds).fix(*ylim)
+    p.x_range = Range1d(
+        start=x_lim.min, end=x_lim.max, bounds=(x_lim.min, x_lim.max))
+    p.y_range = Range1d(
+        start=y_lim.min, end=y_lim.max, bounds=(y_lim.min, y_lim.max))
     return p
 
 

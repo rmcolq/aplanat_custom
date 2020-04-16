@@ -35,11 +35,25 @@ def with_fontawesome(f):
 
             __implementation__ = resource_filename(
                 "aplanat", "fontawesome_icon.ts")
-            __dependencies__ = {"@fortawesome/fontawesome-free": "^5.0.13"}
+            __dependencies__ = {"font-awesome": "^4.6.3"}
 
         f(*args, **kwargs)
         os.chdir(wd)
     return wrapper
+
+
+@with_fontawesome
+def bootstrap_fontawesome():
+    """Create a 'plot' just to bootstrap fontawesome."""
+    p = figure(
+        output_backend='webgl',
+        plot_width=200, plot_height=10,
+        title=None, toolbar_location=None)
+    p.axis.visible = False
+    p.grid.visible = False
+    p.outline_line_color = None
+    p.rect([0.5], [0.5], [1.0], [1.0], fill_color=None)
+    show(p)
 
 
 class Grid(list):
@@ -93,6 +107,11 @@ def grid(plots, ncol=4, **kwargs):
 class InfoGraphItems(dict):
     """Helper class to cumulatively create items for and infographic."""
 
+    def __init__(self, *args, **kwargs):
+        """Initialize the helper, and bootstrap fontawesome."""
+        bootstrap_fontawesome()
+        super().__init__(*args, **kwargs)
+
     def append(self, label, value, icon, unit=''):
         """Add an item.
 
@@ -102,7 +121,7 @@ class InfoGraphItems(dict):
         :param unit: additional suffix after SI unit suffix, e.g. "bases".
 
         """
-        self[label] = (label, value, unit, icon)
+        self[label] = (label, value, icon, unit)
 
     def extend(self, items):
         """Add multiple items at once.
@@ -125,15 +144,22 @@ def infographic(items, ncol=4, **kwargs):
     :param ncol: number of columns in grid of items.
     :param kwargs: kwargs for bokeh gridplot.
 
+    ..note:: If `bootstrap_fontawesome` has not already been called, the
+        function will load the required fonts, however they will not display
+        the first time an Jupyter labs cell is run. If using the
+        `InfoGraphItems` helper class, this wrinkle will be taken care of
+        provided the helper is initiated in a previous cell.
+
     """
     plots = list()
     seen = set()
-    for label, value, unit, icon in items:
+    for label, value, icon, unit in items:
         if label in seen:
             continue
         value = si_format(value) + unit
         seen.add(label)
         p = figure(
+            output_backend='webgl',
             plot_width=175, plot_height=100,
             title=None, toolbar_location=None)
         p.axis.visible = False
