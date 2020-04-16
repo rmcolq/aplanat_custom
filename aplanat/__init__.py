@@ -13,7 +13,7 @@ import fontawesome.icons as fontawesome
 from pkg_resources import resource_filename
 from si_prefix import si_format
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 
 def with_fontawesome(f):
