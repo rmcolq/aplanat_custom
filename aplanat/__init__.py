@@ -61,6 +61,9 @@ def bootstrap_fontawesome():
     p.grid.visible = False
     p.outline_line_color = None
     p.rect([0.5], [0.5], [1.0], [1.0], fill_color=None)
+    p.add_layout(
+        Label(x=0, y=0.3, text_font="FontAwesome", text_color=None,
+            text="{} FontAwesome loaded".format(fontawesome['check'])))
     show(p)
 
 
