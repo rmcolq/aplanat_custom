@@ -13,7 +13,7 @@ import fontawesome.icons as fontawesome
 from pkg_resources import resource_filename
 from si_prefix import si_format
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 
 def with_fontawesome(f):
@@ -37,8 +37,17 @@ def with_fontawesome(f):
                 "aplanat", "fontawesome_icon.ts")
             __dependencies__ = {"font-awesome": "^4.6.3"}
 
-        f(*args, **kwargs)
+        exc = None
+        try:
+            val = f(*args, **kwargs)
+            raise ValueError()
+        except Exception as e:
+            exc = e
         os.chdir(wd)
+
+        if exc is not None:
+            raise exc
+        return val
     return wrapper
 
 
@@ -90,7 +99,7 @@ def show(plot):
     bkio.show(plot)
 
 
-def grid(plots, ncol=4, **kwargs):
+def grid(plots, ncol=4, show=True, **kwargs):
     """Show a grid of plots in a notebook.
 
     :param plots: a list of bokeh plots.
@@ -101,7 +110,10 @@ def grid(plots, ncol=4, **kwargs):
     grid = Grid(width=ncol)
     grid.extend(plots)
     plot = gridplot(grid, **kwargs)
-    show(plot)
+    if show:
+        show(plot)
+    else:
+        return plot
 
 
 class InfoGraphItems(dict):
@@ -133,7 +145,7 @@ class InfoGraphItems(dict):
 
 
 @with_fontawesome
-def infographic(items, ncol=4, **kwargs):
+def infographic(items, ncol=4, show=True, **kwargs):
     """Create and infographic 'plot'.
 
     :param items: 3-tuples of (label, value, unit, icon); the label should be
@@ -183,4 +195,5 @@ def infographic(items, ncol=4, **kwargs):
         plots.append(p)
     defaults = {'toolbar_location': None}
     defaults.update(kwargs)
-    grid(plots, ncol=ncol, **defaults)
+    rtn = grid(plots, ncol=ncol, show=show, **defaults)
+    return rtn
