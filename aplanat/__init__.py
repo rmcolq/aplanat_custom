@@ -40,7 +40,6 @@ def with_fontawesome(f):
         exc = None
         try:
             val = f(*args, **kwargs)
-            raise ValueError()
         except Exception as e:
             exc = e
         os.chdir(wd)
