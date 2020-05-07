@@ -120,7 +120,10 @@ class InfoGraphItems(dict):
 
     def __init__(self, *args, **kwargs):
         """Initialize the helper, and bootstrap fontawesome."""
-        bootstrap_fontawesome()
+        try:
+            bootstrap_fontawesome()
+        except ImportError:
+            pass
         super().__init__(*args, **kwargs)
 
     def append(self, label, value, icon, unit=''):
