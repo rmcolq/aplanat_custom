@@ -59,7 +59,6 @@ def histogram(
     for data in datas:
         x_lim.accumulate(data)
     if binwidth is not None:
-        # TODO: add a calculated step on
         bins = np.arange(x_lim.min, x_lim.max + 1e-10, binwidth)
     else:
         bins = np.linspace(x_lim.min, x_lim.max, num=bins)
@@ -75,7 +74,7 @@ def histogram(
     for data, weight, name, color in zip(datas, weights, names, colors):
         counts, edges = np.histogram(data, weights=weight, bins=bins)
         if normalize:
-            counts /= total_weight
+            counts = counts.astype(float) / total_weight
         y_lim.accumulate(counts)
         kw = {}
         if name is not None:
