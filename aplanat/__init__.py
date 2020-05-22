@@ -102,7 +102,7 @@ def show(plot):
     bkio.show(plot)
 
 
-def grid(plots, ncol=4, show=True, **kwargs):
+def grid(plots, ncol=4, display=True, **kwargs):
     """Show a grid of plots in a notebook.
 
     :param plots: a list of bokeh plots.
@@ -113,7 +113,7 @@ def grid(plots, ncol=4, show=True, **kwargs):
     grid = Grid(width=ncol)
     grid.extend(plots)
     plot = gridplot(grid, **kwargs)
-    if show:
+    if display:
         show(plot)
     else:
         return plot
@@ -151,7 +151,7 @@ class InfoGraphItems(dict):
 
 
 @with_fontawesome
-def infographic(items, ncol=4, show=True, **kwargs):
+def infographic(items, ncol=4, display=True, **kwargs):
     """Create and infographic 'plot'.
 
     :param items: 3-tuples of (label, value, unit, icon); the label should be
@@ -201,5 +201,5 @@ def infographic(items, ncol=4, show=True, **kwargs):
         plots.append(p)
     defaults = {'toolbar_location': None}
     defaults.update(kwargs)
-    rtn = grid(plots, ncol=ncol, show=show, **defaults)
+    rtn = grid(plots, ncol=ncol, display=display, **defaults)
     return rtn
