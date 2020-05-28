@@ -64,7 +64,7 @@ def karyotype(x_datas, y_datas, names=None, colors=None, **kwargs):
     plot_order = dict(zip(chrom_data['chrom'], chrom_data['order']))
     for x, y, name, color in zip(x_datas, y_datas, names, colors):
         y = np.array([plot_order[i] for i in y])
-        kw = {}
+        kw = {'alpha': 0.2}
         if name is not None:
             kw['legend_label'] = name
         if color is not None:
@@ -73,6 +73,7 @@ def karyotype(x_datas, y_datas, names=None, colors=None, **kwargs):
             x, y - width / 2, x, y + width / 2, **kw)
 
     # set up the axes
+    p.xaxis.formatter.use_scientific = False
     p.yaxis.ticker = FixedTicker()
     p.yaxis.ticker.ticks = list(range(1, 25))
     p.yaxis.major_label_overrides = {23: 'X', 24: 'Y'}
