@@ -2,6 +2,7 @@
 
 import functools
 import os
+import warnings
 
 import bokeh.io as bkio
 from bokeh.layouts import gridplot
@@ -14,6 +15,10 @@ from pkg_resources import resource_filename
 from si_prefix import si_format
 
 __version__ = '0.0.10'
+
+# we don't run a comprehensive test suite and mostly in notebooks,
+# so show warnings all the time.
+warnings.simplefilter('always', DeprecationWarning)
 
 
 def with_fontawesome(f):
@@ -110,6 +115,10 @@ def grid(plots, ncol=4, display=True, **kwargs):
     :param kwargs: kwargs for bokeh `gridplot`.
 
     """
+    warnings.warn(
+        "Please use `bokeh.layout.gridplot` directly with an optional "
+        "call to `.show()`", DeprecationWarning)
+
     grid = Grid(width=ncol)
     grid.extend(plots)
     plot = gridplot(grid, **kwargs)
