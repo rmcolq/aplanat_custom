@@ -160,7 +160,7 @@ class InfoGraphItems(dict):
 
 
 @with_fontawesome
-def infographic(items, ncols=4, **kwargs):
+def infographic(items, **kwargs):
     """Create and infographic 'plot'.
 
     :param items: 3-tuples of (label, value, unit, icon); the label should be
@@ -168,7 +168,6 @@ def infographic(items, ncols=4, **kwargs):
         icon the name of a fontawesome icon. `value` should be numeric, it
         will be normalised by use of an SI suffix for display after which
         `unit` will be appended.
-    :param ncols: number of columns in grid of items.
     :param kwargs: kwargs for bokeh gridplot.
 
     ..note:: If `bootstrap_fontawesome` has not already been called, the
@@ -210,4 +209,4 @@ def infographic(items, ncols=4, **kwargs):
         plots.append(p)
     defaults = {'toolbar_location': None}
     defaults.update(kwargs)
-    return gridplot(plots, ncols=ncol, **defaults)
+    return gridplot(plots, **defaults)
