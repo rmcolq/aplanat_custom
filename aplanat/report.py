@@ -4,6 +4,7 @@ from collections import OrderedDict
 import uuid
 
 from bokeh.embed import components
+from bokeh.model import Model
 from bokeh.models.sources import ColumnDataSource
 from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.resources import INLINE
@@ -19,10 +20,16 @@ class HTMLReport(OrderedDict):
     in which items were added.
     """
 
-    def __init__(self, title="", lead=""):
-        """Initialize the report item collection."""
+    def __init__(self, title="", lead="", require_keys=False):
+        """Initialize the report item collection.
+
+        :param title: report title.
+        :param lead: report strapline, shown below title.
+        :param require_keys: require keys when adding items.
+        """
         self.title = title
         self.lead = lead
+        self.require_keys = require_keys
         self.template = Template(
             """\
             <!doctype html>
@@ -49,26 +56,42 @@ class HTMLReport(OrderedDict):
         self.plots = list()
         self.md = markdown.Markdown()
 
+    def _add_item(self, item, key=None):
+        """Add an item to the report.
+
+        :param item: item to add.
+        :param key: unique key for item.
+        """
+        if key is None:
+            if self.require_keys:
+                raise ValueError('A key is required.')
+            else:
+                key = str(uuid.uuid4())
+        self[key] = item
+
+    def placeholder(self, key):
+        """Add a placeholder to be filled in later."""
+        self._add_item(None, key=key)
+
     def plot(self, plot, key=None):
         """Add a plot to the report.
 
         :param plot: bokeh plot instance.
         :param key: unique key for item.
         """
-        if key is None:
-            key = str(uuid.uuid4())
-        self[key] = plot
-        self.plots.append(key)
+        self._add_item(plot, key=key)
 
-    def table(self, df, index=True, key=None, **kwargs):
+    def table(self, df, index=True, key=None, shrink=True, **kwargs):
         """Add a pandas dataframe to the report.
 
         :param df: pandas dataframe instance.
         :param index: include dataframe index in output.
         :param key: unique key for item.
+        :param shrink: shrink wrap the table to avoid whitespace.
         :param kwargs: passed to bokeh DataTable.
         """
         plot = bokeh_table(df, index=index, **kwargs)
+        plot.height = min(plot.height, 25*(len(df) + 1))
         self.plot(plot, key)
 
     def markdown(self, text, key=None):
@@ -77,22 +100,25 @@ class HTMLReport(OrderedDict):
         :param text: markdown formatted text.
         :param key: unique key for item.
         """
-        if key is None:
-            key = str(uuid.uuid4())
         html = self.md.convert(text)
         self.md.reset()
-        self[key] = html
+        self._add_item(html, key=key)
 
     def render(self):
         """Generate HTML report containing figures."""
         resources = INLINE.render()
-        plots = {k: self[k] for k in self.plots}
+        plots = {k: v for k, v in self.items() if isinstance(v, Model)}
         script, plot_divs = components(plots)
+
         divs = list()
         for k in self.keys():
             try:
                 divs.append(plot_divs[k])
             except KeyError:
+                if self[k] is None:
+                    raise ValueError(
+                        "Placeholder `{}` was not assigned a value.".format(k)
+                        )
                 divs.append(self[k])
         divs = '\n'.join(divs)
         return self.template.render(

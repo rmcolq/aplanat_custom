@@ -50,6 +50,10 @@ def karyotype(x_datas, y_datas, names=None, colors=None, **kwargs):
     :returns: a bokeh plot.
 
     """
+    if names is None:
+        names = [None] * len(x_datas)
+    if colors is None:
+        colors = [None] * len(x_datas)
     defaults = {
         "output_backend": "webgl",
         "height": 300, "width": 600}
