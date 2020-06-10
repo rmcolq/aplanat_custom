@@ -207,6 +207,6 @@ def infographic(items, **kwargs):
                 x=0.65, y=0.4, text=fontawesome[icon], text_color="#6BAED6",
                 text_font="FontAwesome", text_font_size="48px"))
         plots.append(p)
-    defaults = {'toolbar_location': None}
+    defaults = {'toolbar_location': None, "ncols": len(items)}
     defaults.update(kwargs)
     return gridplot(plots, **defaults)
