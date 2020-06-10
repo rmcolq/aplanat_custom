@@ -39,12 +39,14 @@ order chrom length
 chrom_data = pd.read_csv(StringIO(chrom_data), delimiter=" ")
 
 
-def karyotype(x_datas, y_datas, names=None, colors=None, **kwargs):
+def karyotype(x_datas, y_datas, names=None, colors=None, alpha=0.2, **kwargs):
     """Create a heatmap from three columns.
 
     :param x: x-axis coordinates (chromosome position)
     :param y: y-axis coordinates (chromosome)
     :param name: title for z-axis.
+    :param colors: colours to plot tics for each data series.
+    :param alpha: alpha level (transparency) with which to plot tics.
     :param kwargs: kwargs for bokeh figure.
 
     :returns: a bokeh plot.
@@ -68,7 +70,7 @@ def karyotype(x_datas, y_datas, names=None, colors=None, **kwargs):
     plot_order = dict(zip(chrom_data['chrom'], chrom_data['order']))
     for x, y, name, color in zip(x_datas, y_datas, names, colors):
         y = np.array([plot_order[i] for i in y])
-        kw = {'alpha': 0.2}
+        kw = {'alpha': alpha}
         if name is not None:
             kw['legend_label'] = name
         if color is not None:
