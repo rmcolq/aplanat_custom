@@ -14,7 +14,7 @@ import fontawesome.icons as fontawesome
 from pkg_resources import resource_filename
 from si_prefix import si_format
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
