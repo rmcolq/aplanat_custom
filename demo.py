@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 import aplanat
-from aplanat import bio, hist, points, report, spatial
+from aplanat import annot, bio, hist, points, report, spatial
 
 x = np.random.normal(size=2000)
 y = np.random.normal(size=2000)
@@ -26,7 +26,10 @@ report.placeholder("histogram preamble")
 
 # There's no need to provide key (unless require_keys is set). Items added
 # without a key cannot be replaced however.
-report.plot(hist.histogram([x, y], colors=['red', 'green']))
+h = hist.histogram([x - 1, y + 1], colors=['red', 'green'])
+h = annot.marker_vline(h, np.mean(x) - 1, label='x values - 1', color='red', text_baseline='bottom')
+h = annot.marker_vline(h, np.mean(y) + 1, label='y values + 1', color='green', text_baseline='top')
+report.plot(h)
 
 # To delete an item, just delete the key
 report.markdown("Garbage", key='garbage')
@@ -53,7 +56,7 @@ exec_summary.append('Total reads', 1000000, 'angle-up', '')
 exec_summary.append('Total yield', 1e9, 'signal', 'b')
 exec_summary.append('Mean read length', 50e3, 'align-center', 'b')
 exec_summary.append('Mean qscore (pass)', 14, 'thumbs-up', '')
-plot = aplanat.infographic(exec_summary.values(), ncols=2)
+plot = aplanat.infographic(exec_summary.values())
 report.plot(plot)
 
 chroms = np.random.choice(bio.chrom_data['chrom'], size=10000)
