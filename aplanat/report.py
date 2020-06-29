@@ -13,7 +13,8 @@ import markdown
 
 
 class HTMLSection(OrderedDict):
-    
+    """A section of a report."""
+
     def __init__(self, require_keys=False):
         """Initialize the report item collection.
 
@@ -120,7 +121,7 @@ class HTMLReport(HTMLSection):
         )
 
     def add_section(self, key=None):
-        """Adds a section (grouping of items) to the report.
+        """Add a section (grouping of items) to the report.
 
         :param key: unique key for section.
 
@@ -150,7 +151,8 @@ class HTMLReport(HTMLSection):
                 except KeyError:
                     if section[k] is None:
                         raise ValueError(
-                            "Placeholder `{}` was not assigned a value.".format(k)
+                            "Placeholder `{}` was not assigned "
+                            "a value.".format(k)
                             )
                     section_divs.append(section[k])
             all_divs.extend(section_divs)
