@@ -165,9 +165,9 @@ def infographic(items, **kwargs):
 
     :param items: 3-tuples of (label, value, unit, icon); the label should be
         a one or two word description, the value the headline number, and the
-        icon the name of a fontawesome icon. `value` should be numeric, it
+        icon the name of a fontawesome icon. If `value` is  numeric, it
         will be normalised by use of an SI suffix for display after which
-        `unit` will be appended.
+        `unit` will be appended. If `value` is a string it will be used as is.
     :param kwargs: kwargs for bokeh gridplot.
 
     ..note:: If `bootstrap_fontawesome` has not already been called, the
@@ -182,7 +182,8 @@ def infographic(items, **kwargs):
     for label, value, icon, unit in items:
         if label in seen:
             continue
-        value = si_format(value) + unit
+        if not isinstance(value, str):
+            value = si_format(value) + unit
         seen.add(label)
         p = figure(
             output_backend='webgl',
