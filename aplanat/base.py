@@ -31,6 +31,10 @@ def simple(
         * p.xaxis.axis_label
         * p.yaxis.axis_label
     """
+    mode = None
+    if 'mode' in kwargs:
+        mode = kwargs['mode']
+        del kwargs['mode']
     # TODO: slacken this
     if not isinstance(x_datas, list) or not isinstance(y_datas, list):
         raise ValueError(
@@ -65,6 +69,8 @@ def simple(
             p.line(x=x, y=y, line_width=1.5, **kw)
         elif style == 'points':
             p.circle(x=x, y=y, alpha=0.4, **kw)
+        elif style == 'steps':
+            p.step(x=x, y=y, line_width=1.5, mode=mode, **kw)
         else:
             raise ValueError('Unknown plot style: "{}"'.format(style))
     x_lim.fix(*xlim)
