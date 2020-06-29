@@ -12,47 +12,16 @@ from jinja2 import Template
 import markdown
 
 
-class HTMLReport(OrderedDict):
-    """Generate HTML Report from a series of bokeh figures.
-
-    Items added to the report take an optional key argument, adding items
-    with the same key allows an update in place whilst maintaining the order
-    in which items were added.
-    """
-
-    def __init__(self, title="", lead="", require_keys=False):
+class HTMLSection(OrderedDict):
+    
+    def __init__(self, require_keys=False):
         """Initialize the report item collection.
 
         :param title: report title.
         :param lead: report strapline, shown below title.
         :param require_keys: require keys when adding items.
         """
-        self.title = title
-        self.lead = lead
         self.require_keys = require_keys
-        self.template = Template(
-            """\
-            <!doctype html>
-            <html lang="en">
-            <head>
-                <meta charset="utf-8">
-                <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <title>{{ title }}</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-
-                    {{ resources }}
-                    {{ script }}
-                </head>
-                <body>
-            <div class="container">
-              <h1>{{ title }}</h1>
-              <p class="lead">{{ lead }}
-            {{ div }}
-                </body>
-            </html>
-            """  # noqa
-        )
         self.plots = list()
         self.md = markdown.Markdown()
 
@@ -104,23 +73,90 @@ class HTMLReport(OrderedDict):
         self.md.reset()
         self._add_item(html, key=key)
 
+
+class HTMLReport(HTMLSection):
+    """Generate HTML Report from a series of bokeh figures.
+
+    Items added to the report take an optional key argument, adding items
+    with the same key allows an update in place whilst maintaining the order
+    in which items were added. Items can be grouped into sections for easier
+    out of order addition.
+    """
+
+    def __init__(self, title="", lead="", require_keys=False):
+        """Initialize the report item collection.
+
+        :param title: report title.
+        :param lead: report strapline, shown below title.
+        :param require_keys: require keys when adding items.
+        """
+        super().__init__(require_keys=require_keys)
+        self.title = title
+        self.lead = lead
+        self.sections = OrderedDict()
+        self.sections['main'] = self
+        self.template = Template(
+            """\
+            <!doctype html>
+            <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>{{ title }}</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+                    {{ resources }}
+                    {{ script }}
+                </head>
+                <body>
+            <div class="container">
+              <h1>{{ title }}</h1>
+              <p class="lead">{{ lead }}
+            {{ div }}
+                </body>
+            </html>
+            """  # noqa
+        )
+
+    def add_section(self, key=None):
+        """Adds a section (grouping of items) to the report.
+
+        :param key: unique key for section.
+
+        :returns: the report section.
+
+        """
+        if key is None:
+            key = str(uuid.uuid4())
+        self.sections[key] = HTMLSection(require_keys=self.require_keys)
+        return self.sections[key]
+
     def render(self):
         """Generate HTML report containing figures."""
         resources = INLINE.render()
-        plots = {k: v for k, v in self.items() if isinstance(v, Model)}
-        script, plot_divs = components(plots)
 
-        divs = list()
-        for k in self.keys():
-            try:
-                divs.append(plot_divs[k])
-            except KeyError:
-                if self[k] is None:
-                    raise ValueError(
-                        "Placeholder `{}` was not assigned a value.".format(k)
-                        )
-                divs.append(self[k])
-        divs = '\n'.join(divs)
+        all_divs = list()
+        scripts = list()
+        for sec_name, section in self.sections.items():
+            plots = {k: v for k, v in section.items() if isinstance(v, Model)}
+            script, plot_divs = components(plots)
+            scripts.append(script)
+
+            section_divs = list()
+            for k in section.keys():
+                try:
+                    section_divs.append(plot_divs[k])
+                except KeyError:
+                    if section[k] is None:
+                        raise ValueError(
+                            "Placeholder `{}` was not assigned a value.".format(k)
+                            )
+                    section_divs.append(section[k])
+            all_divs.extend(section_divs)
+
+        divs = '\n'.join(all_divs)
+        script = '\n'.join(scripts)
         return self.template.render(
             title=self.title, lead=self.lead,
             resources=resources, script=script, div=divs)

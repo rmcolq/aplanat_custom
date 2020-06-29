@@ -17,6 +17,11 @@ report = report.HTMLReport(
 # delay the addition of items. Markdown can be used for text items.
 report.markdown("placeholder", key="simple preamble")
 
+# We can also add additional sections. These function as their own mini-report
+# and each section is rendered in its entirety in the order it was added.
+# (The main HTMLReport is logically the first section).
+gallery = report.add_section(key="additional_section")
+
 # Adding a plot
 report.plot(points.points(sorted_xy, sorted_xy[::-1]), key="line_plot")
 
@@ -50,14 +55,14 @@ df = df[0:5]
 report.table(df, key='Table with auto_height', height=200)
 
 # Gallery
-report.placeholder("gallery preamble")
+gallery.placeholder("gallery preamble")
 exec_summary = aplanat.InfoGraphItems()
 exec_summary.append('Total reads', 1000000, 'angle-up', '')
 exec_summary.append('Total yield', 1e9, 'signal', 'b')
 exec_summary.append('Mean read length', 50e3, 'align-center', 'b')
 exec_summary.append('Mean qscore (pass)', 14, 'thumbs-up', '')
 plot = aplanat.infographic(exec_summary.values())
-report.plot(plot)
+gallery.plot(plot)
 
 chroms = np.random.choice(bio.chrom_data['chrom'], size=10000)
 positions = list()
@@ -65,7 +70,7 @@ for chrom in chroms:
     length = bio.chrom_data.loc[bio.chrom_data['chrom'] == chrom, 'length']
     positions.append(np.random.randint(length)[0])
 plot = bio.karyotype([positions], [chroms])
-report.plot(plot)
+gallery.plot(plot)
 
 # Trying to render now will raise ValueError because the placeholders are
 # not filled in
@@ -100,7 +105,7 @@ Data tables:
 """, "table preamble")
 
 
-report.markdown("""
+gallery.markdown("""
 ### Gallery
 
 Assortment of possibilities:
