@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 import aplanat
-from aplanat import annot, bio, hist, points, report, spatial
+from aplanat import annot, bio, graphics, hist, points, report, spatial
 
 x = np.random.normal(size=2000)
 y = np.random.normal(size=2000)
@@ -56,12 +56,12 @@ report.table(df, key='Table with auto_height', height=200)
 
 # Gallery
 gallery.placeholder("gallery preamble")
-exec_summary = aplanat.InfoGraphItems()
+exec_summary = graphics.InfoGraphItems()
 exec_summary.append('Total reads', 1000000, 'angle-up', '')
 exec_summary.append('Total yield', 1e9, 'signal', 'b')
 exec_summary.append('Mean read length', 50e3, 'align-center', 'b')
 exec_summary.append('Mean qscore (pass)', 14, 'thumbs-up', '')
-plot = aplanat.infographic(exec_summary.values())
+plot = graphics.infographic(exec_summary.values())
 gallery.plot(plot)
 
 chroms = np.random.choice(bio.chrom_data['chrom'], size=10000)

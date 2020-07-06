@@ -9,10 +9,7 @@ test:
     stage: test
     before_script:
         - apt-get update -qq && apt-get install -y -qq
-          python3-all-dev python-virtualenv curl
-        - curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
-        - bash nodesource_setup.sh
-        - apt-get update -qq && apt-get install nodejs
+          python3-all-dev python-virtualenv
     script:
         - make test
         - make docs
