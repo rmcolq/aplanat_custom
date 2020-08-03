@@ -5,7 +5,7 @@ import warnings
 import bokeh.io as bkio
 from bokeh.layouts import gridplot
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
