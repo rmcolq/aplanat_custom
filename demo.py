@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 
+from bokeh.layouts import gridplot
+
 import aplanat
-from aplanat import annot, bio, graphics, hist, points, report, spatial
+from aplanat import annot, bars, bio, graphics, hist, points, report, spatial
 
 x = np.random.normal(size=2000)
 y = np.random.normal(size=2000)
@@ -54,6 +56,16 @@ report.markdown(
 df = df[0:5]
 report.table(df, key='Table with auto_height', height=200)
 
+# boxplot series with discretised x
+report.placeholder("boxplot preamble")
+x_discrete = np.around(x, 0)
+x_str = [str(x) for x in np.abs(x_discrete)]
+report.plot(
+    gridplot([
+        bars.boxplot_series(x_discrete, y, width=300, title='continuous'),
+        bars.boxplot_series(x_str, y, width=300, title='categorical')],
+        ncols=2))
+
 # Gallery
 gallery.placeholder("gallery preamble")
 exec_summary = graphics.InfoGraphItems()
@@ -103,6 +115,13 @@ report.markdown("""
 
 Data tables:
 """, "table preamble")
+
+
+report.markdown("""
+### Boxplots
+
+A series of boxplots using either a continuous or categorical grouping:
+""", "boxplot preamble")
 
 
 gallery.markdown("""
