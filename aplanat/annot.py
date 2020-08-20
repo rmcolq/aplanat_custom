@@ -4,7 +4,8 @@ from bokeh.models import Span, Title
 import numpy as np
 
 
-def marker_vline(plot, x, label=None, color='black', width=1.5):
+def marker_vline(
+        plot, x, label=None, color='black', width=1.5, text_baseline='bottom'):
     """Add a vertical line to a plot with optional label.
 
     :param plot: a bokeh plot instance.
@@ -12,6 +13,9 @@ def marker_vline(plot, x, label=None, color='black', width=1.5):
     :param label: text label.
     :param color: colour for line.
     :param width: line width.
+    :param text_baseline: one of `top`, `middle`, or `bottom` - where to place
+        the label with respect to the line. `top` corresponds to the right,
+        `bottom` to the left of the drawn line.
 
     :returns: updated plot.
 
@@ -26,11 +30,13 @@ def marker_vline(plot, x, label=None, color='black', width=1.5):
             raise ValueError(
                 "Please set plot.y_range before adding a vline with text.")
         plot.text(
-            x=[x], y=[0.5 * ymax], angle=np.pi / 2, text=[label])
+            x=[x], y=[0.5 * ymax], angle=np.pi / 2, text=[label],
+            text_baseline=text_baseline)
     return plot
 
 
-def marker_hline(plot, y, label=None, color='black', width=1.5):
+def marker_hline(
+        plot, y, label=None, color='black', width=1.5, text_baseline='bottom'):
     """Add a horizontal line to a plot with optional label.
 
     :param plot: a bokeh plot instance.
@@ -38,6 +44,8 @@ def marker_hline(plot, y, label=None, color='black', width=1.5):
     :param label: text label.
     :param color: colour for line.
     :param width: line width.
+    :param text_baseline: one of `top`, `middle`, or `bottom` - where to place
+        the label with respect to the line.
 
     :returns: updated plot.
 

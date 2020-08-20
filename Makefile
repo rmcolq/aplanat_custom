@@ -17,6 +17,8 @@ test: venv/bin/activate
 	${IN_VENV} && flake8 aplanat \
 		--import-order-style google --application-import-names aplanat \
 		--statistics
+	# demo should run without error
+	${IN_VENV} && python demo.py
 
 IN_BUILD=. ./pypi_build/bin/activate
 pypi_build/bin/activate:

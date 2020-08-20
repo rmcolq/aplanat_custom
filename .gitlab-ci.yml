@@ -13,6 +13,9 @@ test:
     script:
         - make test
         - make docs
+    artifacts:
+        paths:
+            - demo.html
 
 build:sdist:
     stage: build
