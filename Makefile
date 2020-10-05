@@ -1,6 +1,6 @@
 .PHONY: develop docs
 
-PYTHON := python3
+PYTHON ?= python3
 
 IN_VENV=. ./venv/bin/activate
 

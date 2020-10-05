@@ -1,5 +1,6 @@
 """Utility functions for aiding plotting."""
 
+from bokeh import palettes
 import numpy as np
 from scipy import stats as sp_stats
 
@@ -37,6 +38,10 @@ class Limiter(object):
             self.max = upper
         return self
 
+    def __repr__(self):
+        """Return string representation of self."""
+        return repr((self.min, self.max))
+
 
 def pad(data):
     """Attempt to find a sensible plot bounds for a vector."""
@@ -65,3 +70,21 @@ def kernel_density_estimate(x, step=0.2):
     kernel = sp_stats.gaussian_kde(x, bw_method=bw)
     pdf = kernel(x_grid)
     return x_grid, pdf
+
+
+def choose_palette(ncolours):
+    """Choose colour palette.
+
+    :param: ncolours: number of colours.
+    """
+    if ncolours <= 20:
+        # Category20 contains dark/light pairs, avoid using these
+        pal = palettes.Category20[20]
+        palette = pal[0::2] + pal[1::2]
+        cols = palette[0:ncolours]
+    elif ncolours <= 256:
+        cols = palettes.Viridis256[::256//ncolours]
+    else:
+        raise ValueError(
+            "Cannot create colour palette with more than 256 colours.")
+    return cols
