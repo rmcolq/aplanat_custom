@@ -63,7 +63,8 @@ def heatmap(x, y, z, name=None, **kwargs):
 
 def heatmap2(
         x, y, name=None, x_bins=50, y_bins=50, log=False,
-        xlim=(None, None), ylim=(None, None), **kwargs):
+        xlim=(None, None), ylim=(None, None), zlim=(None, None),
+        **kwargs):
     """Create a heatmap from two columns, using integrate binning.
 
     In contrast to `heatmap` which takes coordinates and counts, this function
@@ -77,6 +78,8 @@ def heatmap2(
     :param xlim: tuple for plotting limits (start, end). A value None will
         trigger calculation from the data.
     :param ylim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
+    :param zlim: tuple for colour map limits (start, end). A value None will
         trigger calculation from the data.
     :param log: use a log-scaled colour map.
 
@@ -101,7 +104,12 @@ def heatmap2(
     p = figure(**defaults)
     # define a colour map
     cmap = log_cmap if log else linear_cmap
-    mapper = cmap('counts', 'Viridis256', 0, max(table['value']))
+    cmin, cmax = zlim
+    if cmin is None:
+        cmin = min(table['value'])
+    if cmax is None:
+        cmax = max(table['value'])
+    mapper = cmap('counts', 'Viridis256', cmin, cmax)
     # plot heatmap rectangles
     width = (x_edges[-1] - x_edges[0]) / x_bins
     height = (y_edges[-1] - y_edges[0]) / y_bins
