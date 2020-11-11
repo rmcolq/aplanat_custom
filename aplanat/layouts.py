@@ -91,6 +91,8 @@ def facet_grid(
                     y = transform[1](y)
                 y_data.append(y)
         # make the plot
+        if len(x_data) == 0:
+            continue  # no data for this facet
         plot = plot_func(
             x_data, y_data, colors=colors,
             xlim=xlim, ylim=ylim,
