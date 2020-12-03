@@ -32,7 +32,7 @@ class IconRGBA:
                 {k: (i, icon_set) for k in icon_set.css_icons.keys()})
         self.tmpdir = tempfile.TemporaryDirectory()
 
-    def rgba(self, icon, size, color='black', scale='auto'):
+    def rgba(self, icon, size, color='black', scale='auto', uint32=True):
         """Create RGBA array for icon.
 
         :param icon: valid icon name
@@ -40,6 +40,8 @@ class IconRGBA:
         :param color: color name or hex value
         :param scale: scaling factor between 0 and 1,
             or 'auto' for automatic scaling
+        :param uint32: return a two-dimension uint32-packed array (as
+            required by bokeh image_rgba).
         """
         fname = icon + '.png'
         tmpfile = os.path.join(self.tmpdir.name, fname)
@@ -52,7 +54,11 @@ class IconRGBA:
             export_dir=self.tmpdir.name)
         if not os.path.isfile(tmpfile):
             raise RuntimeError('Image not produced.')
-        return np.array(Image.open(tmpfile))[::-1, :, :]
+        image = np.ascontiguousarray(
+            np.array(Image.open(tmpfile))[::-1, :, :])
+        if uint32:
+            image = image.view(dtype=np.uint32).reshape(size, size)
+        return image
 
 
 fa_icons = IconRGBA()
