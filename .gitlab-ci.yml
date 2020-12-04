@@ -36,7 +36,7 @@ deploy:pypi:
     script:
         - make pypi_build/bin/activate
         - source pypi_build/bin/activate
-        - twine upload dist/*.tar.gz
+        - twine upload --non-interactive dist/*.tar.gz
     only:
         - tags
         
