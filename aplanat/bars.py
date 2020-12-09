@@ -1,7 +1,9 @@
 """Creation of bar-like plots."""
 
 from bokeh.models import Range1d
+from bokeh.models.ranges import FactorRange
 from bokeh.plotting import figure
+import numpy as np
 import pandas as pd
 
 from aplanat import util
@@ -60,6 +62,8 @@ def simple_bar(
     :param kwargs: kwargs for bokeh figure.
 
     """
+    # see https://docs.bokeh.org/en/latest/docs/user_guide/categorical.html
+    # for how boxplots can get complicated fast!
     defaults = {
         'output_backend': 'webgl',
         'plot_height': 300, 'plot_width': 600}
@@ -78,7 +82,9 @@ def boxplot_series(
         **kwargs):
     """Create a (e.g. time-) series of boxplots for a variable.
 
-    :param groups: the grouping variable (the x-axis values).
+    :param groups: the grouping variable (the x-axis values). The function
+        will handle also non-numeric, categorical grouping variables (though
+        the sort order is not controllable).
     :param values: the data for boxplots are drawn (the y-axis values).
     :param xlim: tuple for plotting limits (start, end). A value None will
         trigger calculation from the data.
@@ -96,11 +102,19 @@ def boxplot_series(
     df = pd.DataFrame(dict(
        group=groups, value=values))
     uniq = df.group.unique()
+    # numeric or categorical
+    if not np.issubdtype(uniq.dtype, np.number):
+        x_range = FactorRange(factors=uniq)
+    else:
+        xlim = util.Limiter(util.pad(uniq)).fix(*xlim)
+        x_range = Range1d(
+            start=xlim.min, end=xlim.max, bounds=(xlim.min, xlim.max))
 
     # find the quartiles and IQR for each category
     groups = df.groupby('group')
     quantiles = groups.quantile([0.25, 0.5, 0.75])
     quantiles.index.names = ['group', 'quantile']
+    uniq = groups.apply(lambda x: x.name).tolist()
     q1 = quantiles.xs(0.25, level='quantile')
     q2 = quantiles.xs(0.50, level='quantile')
     q3 = quantiles.xs(0.75, level='quantile')
@@ -112,7 +126,12 @@ def boxplot_series(
         "output_backend": "webgl",
         "height": 300, "width": 600}
     defaults.update(kwargs)
-    p = figure(**defaults)
+
+    ylim = util.Limiter().accumulate(df['value']).fix(*ylim)
+    y_range = Range1d(
+        start=ylim.min, end=ylim.max, bounds=(ylim.min, ylim.max))
+
+    p = figure(**defaults, x_range=x_range, y_range=y_range)
 
     # stems
     p.segment(uniq, upper.value, uniq, q3.value, line_color="black")
@@ -121,15 +140,6 @@ def boxplot_series(
     # boxes
     for low, high in ((q2.value, q3.value), (q1.value, q2.value)):
         p.vbar(
-            uniq, 0.8, low, high,
-            fill_color="blue", alpha=0.7,
-            line_color="black")
+            uniq, 0.8, low, high, line_color='black')
 
-    # set up the axes
-    xlim = util.Limiter(util.pad(uniq)).fix(*xlim)
-    ylim = util.Limiter().accumulate(df['value']).fix(*ylim)
-    p.x_range = Range1d(
-        start=xlim.min, end=xlim.max, bounds=(xlim.min, xlim.max))
-    p.y_range = Range1d(
-        start=ylim.min, end=ylim.max, bounds=(ylim.min, ylim.max))
     return p
