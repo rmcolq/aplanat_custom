@@ -5,6 +5,7 @@ stages:
     - build
     - deploy
 
+
 test:
     stage: test
     before_script:
@@ -17,6 +18,7 @@ test:
         paths:
             - demo.html
 
+
 build:sdist:
     stage: build
     before_script:
@@ -27,6 +29,7 @@ build:sdist:
     artifacts:
         paths:
             - dist/*.tar.gz
+
 
 deploy:pypi:
     stage: deploy
@@ -40,8 +43,9 @@ deploy:pypi:
     only:
         - tags
 
+
 deploy:github:
-    stage: test
+    stage: deploy
     before_script:
         - apt-get update -qq && apt-get install -y -qq git
         - mkdir ~/.ssh/
@@ -55,13 +59,13 @@ deploy:github:
         - git fetch ont dev --tags
         - git fetch ont master
         - git fetch github master
-        - git checkout ont/master
-        - git merge ont/dev
+        - git checkout --track github/master || git checkout master
+        - git merge ${CI_COMMIT_REF_NAME}
         - git push github master
         - git push github ${CI_COMMIT_REF_NAME}
     only:
-        - branches
-        - /^master$/
+        - tags
+
 
 deploy:trigger:
     stage: deploy

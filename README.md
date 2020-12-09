@@ -28,7 +28,8 @@ and downfall of a number of plotting libraries. Being overly generic leads
 to confusing documentation and boilerplate code. As much as the developers
 love the declarative nature of `ggplot` in `R`, aplanat eschews this approach
 in search of something more transparent --- aplanat does not try to be too
-clever with your data.
+clever with your data. Having said that, the `layouts` module does
+provide templates to create facet grids directly from a dataframe.
 
 Rather aplanat attempts to make constructing common plots as simple as possible
 by translating directly a users inputs into displayed data. Most plotting
@@ -95,3 +96,32 @@ To show multiple plots, use `aplanat.grid` rather than `aplanat.show`:
     aplanat.grid(plots, ncol=3)
 
 The plots will be shown filling a grid row-wise.
+
+### ggplot-like facet_grid
+
+All the above examples show how all the fundamental plotting functions
+transparently turn vector inputs into plotting variables. To provide
+a higher-level interface the `layouts` module provides the ability
+to create more advanced (multi-) plots. For example a common plot is
+to create layout a base plot type with data segregated by two facets
+in a grid. The `facet_grid` function will accept a `pandas` dataframe
+and perform this operation.
+
+    from aplanat.layouts import facet_grid
+    transform= lambda z: z
+    plot = facet_grid(
+        data_frame,
+        {'x':'x_variable', 'y':'y_variable', 'col':'colour_variable'},
+        lines.line,  # the plot type
+        xlim=(0, None), ylim=(0, None),
+        transform=(transform, transform),
+        facet=('X facet', 'Y facet'),
+        height=300, width=300,
+        x_facet_heading='X Facetlabel',
+        y_facet_heading='Y Facet label',
+        x_axis_label='x-axis plot label',
+        y_axis_label='y-axis plot label')
+
+
+The `transform` callback functions can be used to transform the x and y data
+for each subplot after it has been selected, allowing arbitrary manipulation.

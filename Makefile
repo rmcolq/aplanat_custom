@@ -1,6 +1,6 @@
 .PHONY: develop docs
 
-PYTHON := python3
+PYTHON ?= python3
 
 IN_VENV=. ./venv/bin/activate
 
@@ -24,7 +24,7 @@ IN_BUILD=. ./pypi_build/bin/activate
 pypi_build/bin/activate:
 	test -d pypi_build || virtualenv pypi_build --python=python3 --prompt "(pypi) "
 	${IN_BUILD} && pip install pip --upgrade
-	${IN_BUILD} && pip install --upgrade pip setuptools twine wheel readme_renderer[md]
+	${IN_BUILD} && pip install --upgrade pip setuptools twine wheel readme_renderer[md] keyrings.alt
 
 .PHONY: sdist
 sdist: pypi_build/bin/activate
