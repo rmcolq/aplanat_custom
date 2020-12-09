@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 
@@ -76,12 +78,14 @@ exec_summary.append('Mean qscore (pass)', 14, 'thumbs-up', '')
 plot = graphics.infographic(exec_summary.values())
 gallery.plot(plot)
 
-chroms = np.random.choice(bio.chrom_data['chrom'], size=10000)
+chrom_data = deepcopy(bio._chrom_data_)
+chrom_data['chrom'] = chrom_data['chrom'].apply(lambda x: 'chr' + x)
+chroms = np.random.choice(chrom_data['chrom'], size=10000)
 positions = list()
 for chrom in chroms:
-    length = bio.chrom_data.loc[bio.chrom_data['chrom'] == chrom, 'length']
+    length = chrom_data.loc[chrom_data['chrom'] == chrom, 'length']
     positions.append(np.random.randint(length)[0])
-plot = bio.karyotype([positions], [chroms])
+plot = bio.karyotype([positions], [chroms], chrom_data=chrom_data)
 gallery.plot(plot)
 
 # Trying to render now will raise ValueError because the placeholders are
