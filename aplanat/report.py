@@ -10,6 +10,7 @@ from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.resources import INLINE
 from jinja2 import Template
 import markdown
+import pkg_resources
 
 
 class HTMLSection(OrderedDict):
@@ -140,10 +141,22 @@ class HTMLReport(HTMLSection):
         all_divs = list()
         scripts = list()
         for sec_name, section in self.sections.items():
-            plots = {k: v for k, v in section.items() if isinstance(v, Model)}
-            script, plot_divs = components(plots)
-            scripts.append(script)
+            plot_divs = dict()
 
+            # handle bokeh plots
+            plots = {k: v for k, v in section.items() if isinstance(v, Model)}
+            if len(plots) > 0:
+                script, plots = components(plots)
+                scripts.append(script)
+                plot_divs.update(plots)
+
+            # nextclade
+            for k, v in section.items():
+                if isinstance(v, NextClade):
+                    scripts.append(v.script)
+                    plot_divs[k] = v.div
+
+            # put things together in order
             section_divs = list()
             for k in section.keys():
                 try:
@@ -167,6 +180,38 @@ class HTMLReport(HTMLSection):
         """Write html report to file."""
         with open(path, "w", encoding='utf8') as outfile:
             outfile.write(self.render())
+
+
+class NextClade:
+    """A nextclade report component."""
+
+    def __init__(self, json):
+        """Initialize a report component.
+
+        :param json: a json file output by nextclade.
+        """
+        with open(json) as fh:
+            data = fh.read()
+
+        template = Template(
+            """\
+            <div>
+            <nxt-table>
+                <script defer="">
+                const data = {{ data }}
+                var nxt = document.querySelector('nxt-table')
+                nxt.data = data
+                </script>
+            </nxt-table>
+            </div>
+            """  # noqa
+        )
+        self.div = template.render(data=data)
+
+        script = pkg_resources.resource_filename(
+            __package__, 'data/nextclade.html')
+        with open(script) as fh:
+            self.script = fh.read()
 
 
 def bokeh_table(df, index=True, **kwargs):
