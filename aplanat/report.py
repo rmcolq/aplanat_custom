@@ -188,11 +188,8 @@ class NextClade:
     def __init__(self, json):
         """Initialize a report component.
 
-        :param json: a json file output by nextclade.
+        :param json: json data output by nextclade
         """
-        with open(json) as fh:
-            data = fh.read()
-
         template = Template(
             """\
             <div>
@@ -206,7 +203,7 @@ class NextClade:
             </div>
             """  # noqa
         )
-        self.div = template.render(data=data)
+        self.div = template.render(data=json)
 
         script = pkg_resources.resource_filename(
             __package__, 'data/nextclade.html')
