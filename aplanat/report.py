@@ -207,7 +207,7 @@ class NextClade:
 
         script = pkg_resources.resource_filename(
             __package__, 'data/nextclade.html')
-        with open(script) as fh:
+        with open(script, encoding='utf8') as fh:
             self.script = fh.read()
 
 
