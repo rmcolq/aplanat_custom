@@ -16,7 +16,7 @@ def facet_grid(
         facet=(None, None),
         x_axis_label="", y_axis_label="",
         x_facet_heading="", y_facet_heading="",
-        transform=(None, None),
+        transform=(None, None), link_axes=True,
         **kwargs):
     """Mainly for the creation of facet-grid plots from a Dataframe.
 
@@ -37,6 +37,8 @@ def facet_grid(
     :param y_facet_heading: facet name for the rows (y facet)
     :param transform: a tuple of functions to apply to the (x, y) data of each
         facet before plotting.
+    :param link_axes: link axes of subplots such that panning and zooming
+        effects all plots.
     :param kwargs: kwargs for bokeh figure.
 
     :returns: a bokeh layout.
@@ -91,6 +93,8 @@ def facet_grid(
                     y = transform[1](y)
                 y_data.append(y)
         # make the plot
+        if len(x_data) == 0:
+            continue  # no data for this facet
         plot = plot_func(
             x_data, y_data, colors=colors,
             xlim=xlim, ylim=ylim,
@@ -103,9 +107,12 @@ def facet_grid(
             (getattr(p, attr).start, getattr(p, attr).end)
             for _, p in plots]
         zmin, zmax = min(z[0] for z in zlims), max(z[1] for z in zlims)
+        zrange = Range1d(start=zmin, end=zmax, bounds=(zmin, zmax))
         for _, p in plots:
-            setattr(
-                p, attr, Range1d(start=zmin, end=zmax, bounds=(zmin, zmax)))
+            if not link_axes:
+                # nb: copy.deepcopy doesn't do as intended
+                zrange = Range1d(start=zmin, end=zmax, bounds=(zmin, zmax))
+            setattr(p, attr, zrange)
 
     # make the main panel of plots
     ncols, nrows = len(facet_x_values), len(facet_y_values)

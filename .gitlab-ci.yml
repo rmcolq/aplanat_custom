@@ -5,6 +5,7 @@ stages:
     - build
     - deploy
 
+
 test:
     stage: test
     before_script:
@@ -13,20 +14,12 @@ test:
     script:
         - make test
         - make docs
-    artifacts:
-        paths:
-            - demo.html
-
-build:sdist:
-    stage: build
-    before_script:
-        - apt-get update -qq && apt-get install -y -qq
-          python3-all-dev python-virtualenv
-    script:
         - make sdist
     artifacts:
         paths:
+            - demo.html
             - dist/*.tar.gz
+
 
 deploy:pypi:
     stage: deploy
@@ -36,10 +29,34 @@ deploy:pypi:
     script:
         - make pypi_build/bin/activate
         - source pypi_build/bin/activate
-        - twine upload dist/*.tar.gz
+        - twine upload --non-interactive dist/*.tar.gz
     only:
         - tags
-        
+
+
+deploy:github:
+    stage: deploy
+    before_script:
+        - apt-get update -qq && apt-get install -y -qq git
+        - mkdir ~/.ssh/
+        - cp $LABS_BOT_GH_KEY ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+        - echo -e "Host github.com\n\tStrictHostKeyChecking no\n\tHostname ssh.github.com\n\tPort 443\n\n" > ~/.ssh/config
+        - git config --global user.email "epi2melabs@nanoporetech.com"
+        - git config --global user.name "epi2melabs-bot"
+    script:
+        - git remote add ont ${CI_REPOSITORY_URL} || true
+        - git remote add github git@github.com:epi2me-labs/${CI_PROJECT_NAME}.git || true
+        - git fetch ont dev --tags
+        - git fetch ont master
+        - git fetch github master
+        - git checkout --track github/master || git checkout master
+        - git merge ${CI_COMMIT_REF_NAME}
+        - git push github master
+        - git push github ${CI_COMMIT_REF_NAME}
+    only:
+        - tags
+
+
 deploy:trigger:
     stage: deploy
     trigger: epi2melabs/nanolabs
