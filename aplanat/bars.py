@@ -71,7 +71,9 @@ def simple_bar(
     p = figure(
         x_range=groups,
         **defaults)
-    p.vbar(x=groups, top=counts, fill_color=colors, line_color=colors, width=0.9)
+    p.vbar(
+        x=groups, top=counts,
+        fill_color=colors, line_color=colors, width=0.9)
     p.xgrid.grid_line_color = None
     p.y_range.start = 0
     return p
