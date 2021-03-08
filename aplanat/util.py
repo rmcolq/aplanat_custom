@@ -1,8 +1,18 @@
 """Utility functions for aiding plotting."""
 
+from enum import Enum
+
 from bokeh import palettes
 import numpy as np
 from scipy import stats as sp_stats
+
+
+class Colors(Enum):
+    """A colour palette."""
+
+    np_blue = '#0084A9'
+    np_dark_grey = '#455560'
+    np_light_blue = '#90C6E7'
 
 
 class Limiter(object):

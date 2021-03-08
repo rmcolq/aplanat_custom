@@ -39,7 +39,7 @@ else:
 dir_path = os.path.dirname(__file__)
 with open(os.path.join(dir_path, 'requirements.txt')) as fh:
     install_requires = [
-        str(requirement) for requirement in 
+        str(requirement) for requirement in
         pkg_resources.parse_requirements(fh)]
 
 data_files = []
@@ -68,7 +68,7 @@ setup(
     data_files=data_files,
     entry_points={
         'console_scripts': [
-            #'name' = {}.package.module:function'.format(__pkg_name__)
+            '{0} = {0}:cli'.format(__pkg_name__)
         ]
     },
     scripts=[]
