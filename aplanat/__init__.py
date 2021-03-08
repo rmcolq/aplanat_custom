@@ -1,5 +1,7 @@
 """Simple bokeh plotting API."""
 
+import argparse
+import importlib
 import warnings
 
 from bokeh.colors import RGB
@@ -7,7 +9,7 @@ import bokeh.io as bkio
 from bokeh.layouts import gridplot
 from bokeh.plotting import Figure
 
-__version__ = '0.2.9'
+__version__ = '0.3.0'
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
@@ -125,3 +127,29 @@ def infographic(items, **kwargs):
         "This function has been moved to `aplanat.graphics.infographic()`",
         DeprecationWarning)
     return graphics.infographic(items, **kwargs)
+
+
+def cli():
+    """Run aplanat entry point."""
+    parser = argparse.ArgumentParser(
+        'aplanat',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument(
+        '-v', '--version', action='version',
+        version='%(prog)s {}'.format(__version__))
+
+    subparsers = parser.add_subparsers(
+        title='subcommands', description='valid commands',
+        help='additional help', dest='command')
+    subparsers.required = True
+
+    # add reporting modules
+    modules = ['bcfstats']
+    for module in modules:
+        mod = importlib.import_module('aplanat.components.{}'.format(module))
+        p = subparsers.add_parser(module, parents=[mod.argparser()])
+        p.set_defaults(func=mod.main)
+
+    args = parser.parse_args()
+    args.func(args)

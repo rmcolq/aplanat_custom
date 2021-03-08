@@ -71,6 +71,8 @@ class HTMLSection(OrderedDict):
         :param text: markdown formatted text.
         :param key: unique key for item.
         """
+        if text is None or text == '':
+            return
         html = self.md.convert(text)
         self.md.reset()
         self._add_item(html, key=key)
