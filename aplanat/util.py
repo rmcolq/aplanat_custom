@@ -11,7 +11,7 @@ class _colors:
     cerulean = "#0084A9"
     not_black = "#001A21"
     feldgrau = "#455556"
-    fim_gray = "#666666"
+    dim_gray = "#666666"
     light_cornflower_blue = "#90C5E7"
     dark_gray = "#B5AEA7"
     isabelline = "#F0EFED"
