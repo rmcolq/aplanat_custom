@@ -141,7 +141,7 @@ Insertion and deletion lengths aggregated across all samples.
 
 def indel_lengths(
         bcf_stats, header=_indel_length_header, report=None,
-        color=Colors.np_light_blue):
+        color=Colors.light_cornflower_blue):
     """Create a report section containing an indel length chart.
 
     :param bcf_stats: one or more outputs from `bcftools stats`.
