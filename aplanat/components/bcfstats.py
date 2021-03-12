@@ -178,7 +178,7 @@ def indel_lengths(
 
 
 _full_report_header = """
-## Variant call summaries
+### Variant call summaries
 
 The following tables and figures are derived from
 the output of `bcftools stats`.
