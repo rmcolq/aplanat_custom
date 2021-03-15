@@ -3,6 +3,7 @@ image: ${UBUNTUIMAGE}:18.04
 stages:
     - test
     - build
+    - predeploy
     - deploy
 
 # Insist that the version in __init__.py matches the git tag
@@ -14,6 +15,17 @@ stages:
         exit 1;
     else;
         echo "TAG and PACKAGE versions agree: ${PYVER}";
+    fi
+
+# Insist a CHANGELOG entry has been made
+.check-changelog: &check-changelog |
+    TAGVER=${CI_COMMIT_TAG}
+    MATCHES=$(grep -c "## \[${TAGVER}\]" CHANGELOG.md)
+    if [[ "${MATCHES}" != "1" ]] then;
+        echo "Expected one match to '${CI_COMMIT_TAG}' in CHANGELOG, found ${MATCHES}"
+        exit 1
+    else;
+        echo "Found CHANGELOG.md entry for tag"
     fi
 
 
@@ -31,10 +43,17 @@ test:
             - demo.html
             - dist/*.tar.gz
 
+deploy-checks:
+    stage: predeploy
+    script:
+        - *check-versions
+        - *check-changelog
+    only:
+        - tags
+
 deploy:pypi:
     stage: deploy
     before_script:
-        - *check-versions
         - apt-get update -qq && apt-get install -y -qq
           python3-all-dev python-virtualenv
     script:
@@ -47,7 +66,6 @@ deploy:pypi:
 deploy-conda:
     stage: deploy
     before_script:
-        - *check-versions
         - wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         - bash Miniconda3-latest-Linux-x86_64.sh -b -p /tmp/miniconda
         - source /tmp/miniconda/bin/activate
@@ -64,7 +82,6 @@ deploy-conda:
 push-github:
     stage: deploy
     before_script:
-        - *check-versions
         - apt-get update -qq && apt-get install -y -qq git python3-pip
         - mkdir ~/.ssh/
         - cp $LABS_BOT_GH_KEY ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
