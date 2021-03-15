@@ -10,11 +10,14 @@ from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.resources import INLINE
 from jinja2 import Template
 import markdown
-import pkg_resources
 
 
 class HTMLSection(OrderedDict):
-    """A section of a report."""
+    """A section of a report.
+
+    The class can be extended o provide novel report components by
+    overriding `._extra_components()`.
+    """
 
     def __init__(self, require_keys=False):
         """Initialize the report item collection.
@@ -77,6 +80,57 @@ class HTMLSection(OrderedDict):
         self.md.reset()
         self._add_item(html, key=key)
 
+    def _plot_components(self):
+        """Return html script and div tags for bokeh plots."""
+        # handle bokeh plots
+        scripts = list()
+        divs = dict()
+        plots = {k: v for k, v in self.items() if isinstance(v, Model)}
+        if len(plots) > 0:
+            scripts, divs = components(plots)
+            scripts = [scripts]
+        return scripts, divs
+
+    def _table_components(self):
+        """Return html script and div for tables."""
+        # TODO: reimplement `.table()` to not use bokeh?
+        pass
+
+    def _extra_components(self):
+        """Return additional script and divs."""
+        # hook for derived classes:
+        # return: list of scripts, dict of divs keyed on self.keys
+        return list(), dict()
+
+    def components(self):
+        """Fetch script and div tags for report."""
+        scripts = list()
+        specials = dict()
+        # retrieve bokeh plot divs
+        plot_scripts, plot_divs = self._plot_components()
+        scripts.extend(plot_scripts)
+        specials.update(plot_divs)
+        # TODO: add special handing for new tables?
+        # retrieve any extra specials
+        extra_scripts, extra_divs = self._extra_components()
+        scripts.extend(extra_scripts)
+        specials.update(extra_divs)
+
+        # put things together in order
+        divs = list()
+        for k in self.keys():
+            try:
+                divs.append(specials[k])
+            except KeyError:
+                if self[k] is None:
+                    raise ValueError(
+                        "Placeholder `{}` was not assigned "
+                        "a value.".format(k)
+                        )
+                # fall back to putting items in directly
+                divs.append(self[k])
+        return scripts, divs
+
 
 class HTMLReport(HTMLSection):
     """Generate HTML Report from a series of bokeh figures.
@@ -123,57 +177,38 @@ class HTMLReport(HTMLSection):
             """  # noqa
         )
 
-    def add_section(self, key=None):
+    def add_section(self, key=None, section=None):
         """Add a section (grouping of items) to the report.
 
         :param key: unique key for section.
+        :param section: `HTMLSection` to add rather than creating anew.
 
         :returns: the report section.
 
         """
         if key is None:
             key = str(uuid.uuid4())
-        self.sections[key] = HTMLSection(require_keys=self.require_keys)
+        if section is None:
+            section = HTMLSection(require_keys=self.require_keys)
+        else:
+            if not isinstance(section, HTMLSection):
+                raise TypeError("`section` should be an `HTMLSection`.")
+        self.sections[key] = section
         return self.sections[key]
 
     def render(self):
         """Generate HTML report containing figures."""
         resources = INLINE.render()
 
+        all_scripts = list()
         all_divs = list()
-        scripts = list()
         for sec_name, section in self.sections.items():
-            plot_divs = dict()
+            scripts, divs = section.components()
+            all_scripts.extend(scripts)
+            all_divs.extend(divs)
 
-            # handle bokeh plots
-            plots = {k: v for k, v in section.items() if isinstance(v, Model)}
-            if len(plots) > 0:
-                script, plots = components(plots)
-                scripts.append(script)
-                plot_divs.update(plots)
-
-            # nextclade
-            for k, v in section.items():
-                if isinstance(v, NextClade):
-                    scripts.append(v.script)
-                    plot_divs[k] = v.div
-
-            # put things together in order
-            section_divs = list()
-            for k in section.keys():
-                try:
-                    section_divs.append(plot_divs[k])
-                except KeyError:
-                    if section[k] is None:
-                        raise ValueError(
-                            "Placeholder `{}` was not assigned "
-                            "a value.".format(k)
-                            )
-                    section_divs.append(section[k])
-            all_divs.extend(section_divs)
-
+        script = '\n'.join(all_scripts)
         divs = '\n'.join(all_divs)
-        script = '\n'.join(scripts)
         return self.template.render(
             title=self.title, lead=self.lead,
             resources=resources, script=script, div=divs)
@@ -182,35 +217,6 @@ class HTMLReport(HTMLSection):
         """Write html report to file."""
         with open(path, "w", encoding='utf8') as outfile:
             outfile.write(self.render())
-
-
-class NextClade:
-    """A nextclade report component."""
-
-    def __init__(self, json):
-        """Initialize a report component.
-
-        :param json: json data output by nextclade
-        """
-        template = Template(
-            """\
-            <div>
-            <nxt-table>
-                <script defer="">
-                const data = {{ data }}
-                var nxt = document.querySelector('nxt-table')
-                nxt.data = data
-                </script>
-            </nxt-table>
-            </div>
-            """  # noqa
-        )
-        self.div = template.render(data=json)
-
-        script = pkg_resources.resource_filename(
-            __package__, 'data/nextclade.html')
-        with open(script, encoding='utf8') as fh:
-            self.script = fh.read()
 
 
 def bokeh_table(df, index=True, **kwargs):
