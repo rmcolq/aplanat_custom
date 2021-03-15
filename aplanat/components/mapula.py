@@ -17,38 +17,26 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 from aplanat import hist, points
-from aplanat.report import HTMLReport
+from aplanat.report import HTMLReport, HTMLSection
 from aplanat.util import Colors
 
 
-class PlotMappingStats(object):
+class PlotMappingStats(HTMLSection):
     """Build an aplanat dashboard from mapula's json output."""
 
     def __init__(
         self,
         json: str,
         counts: typing.Union[str, None],
-        output_name: str
     ) -> None:
         """Load the json file and output the dashboard."""
+        super().__init__()
         self.json = json
-        self.output_name = output_name
-        self.output_path = f'{output_name}.html'
         self.md = markdown.Markdown()
         self.counts = counts
 
         self.data = self.load_data(self.json)
-        self.title = 'Alignment statistics'
-        self.subtitle = (
-            "Results generated through the wf-alignment "
-            "nextflow workflow provided by Oxford Nanopore "
-            "Technologies"
-        )
-
         self.build_report(
-            self.title,
-            self.subtitle,
-            self.output_path,
             self.counts,
             **self.data
         )
@@ -72,64 +60,41 @@ class PlotMappingStats(object):
 
     def build_report(
         self,
-        title: str,
-        subtitle: str,
-        output_path: str,
         counts: pd.DataFrame,
         **data
     ):
         """Build_report."""
-        report = HTMLReport(title=title, lead=subtitle)
         tabs = []
 
-        #
         # Plot summary
-        #
         summary_tab = self.build_summary_tab(data)
         tabs.append(summary_tab)
 
-        #
         # Plot accuracy
-        #
         acc_tab = self.build_accuracy_tab(data)
         tabs.append(acc_tab)
 
-        #
         # Plot quality
-        #
         qual_tab = self.build_quality_tab(data)
         tabs.append(qual_tab)
 
-        #
         # Plot lengths
-        #
         len_tab = self.build_length_tab(data)
         tabs.append(len_tab)
 
-        #
         # Plot coverage
-        #
         cov_tab = self.build_coverage_tab(data)
         tabs.append(cov_tab)
 
-        #
         # Plot control
-        #
         if counts:
             con_tab = self.build_control_tab(data, counts)
             tabs.append(con_tab)
 
-        #
         # Tabula rasa
-        #
-        cover_panel = Tabs(tabs=tabs)
-        report.plot(cover_panel)
-        report.render()
-        report.write(output_path)
+        panel = Tabs(tabs=tabs)
+        self.plot(panel)
 
-    #
-    # Methods -- build tabs
-    #
     def build_summary_tab(self, data):
         """Build_summary_tab."""
         alignment_plots = [
@@ -699,11 +664,17 @@ class PlotMappingStats(object):
 
 def main(args):
     """Entry point to create a mapping stats report."""
-    PlotMappingStats(
-        json=args.json,
-        counts=args.counts,
-        output_name=args.name
-    )
+    report = HTMLReport(
+        title='Alignment statistics',
+        lead=(
+            "Results generated through the wf-alignment "
+            "nextflow workflow provided by Oxford Nanopore "
+            "Technologies"))
+    report.add_section(
+        section=PlotMappingStats(
+            json=args.json,
+            counts=args.counts))
+    report.write(args.name + '.html')
 
 
 def argparser():
@@ -711,33 +682,25 @@ def argparser():
     parser = argparse.ArgumentParser(
         'Visualise mapula output',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=False
-    )
+        add_help=False)
 
     parser.add_argument(
         help="Input .json file to plot graphs from.",
-        dest="json",
-        metavar='',
-    )
+        dest="json")
 
     parser.add_argument(
         '-c',
         help=(
             "Expected counts CSV. "
-            "Required columns: reference,expected_count."
-        ),
+            "Required columns: reference,expected_count."),
         dest="counts",
         default=None,
-        required=False,
-        metavar=''
-    )
+        required=False)
 
     parser.add_argument(
         "-n",
         help="Prefix of the output files.",
         dest="name",
         required=False,
-        default="report",
-        metavar=''
-    )
+        default="report")
     return parser

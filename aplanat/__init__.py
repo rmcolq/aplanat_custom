@@ -145,7 +145,7 @@ def cli():
     subparsers.required = True
 
     # add reporting modules
-    modules = ['bcfstats', 'mapula']
+    modules = ['bcfstats', 'mapula', 'nextclade']
     for module in modules:
         mod = importlib.import_module('aplanat.components.{}'.format(module))
         p = subparsers.add_parser(module, parents=[mod.argparser()])
