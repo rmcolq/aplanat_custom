@@ -5,6 +5,7 @@ stages:
     - build
     - predeploy
     - deploy
+    - postdeploy
 
 # Insist that the version in __init__.py matches the git tag
 .check-versions: &check-versions |
@@ -108,7 +109,7 @@ push-github:
 
 
 deploy:trigger:
-    stage: deploy
+    stage: postdeploy
     trigger: epi2melabs/nanolabs
     only:
         - tags
