@@ -9,7 +9,7 @@ import bokeh.io as bkio
 from bokeh.layouts import gridplot
 from bokeh.plotting import Figure
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
@@ -145,7 +145,7 @@ def cli():
     subparsers.required = True
 
     # add reporting modules
-    modules = ['bcfstats', 'mapula', 'nextclade']
+    modules = ['bcfstats', 'mapula', 'nextclade', 'fastcat']
     for module in modules:
         mod = importlib.import_module('aplanat.components.{}'.format(module))
         p = subparsers.add_parser(module, parents=[mod.argparser()])
