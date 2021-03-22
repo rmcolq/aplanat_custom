@@ -2,7 +2,18 @@
 
 from bokeh import palettes
 import numpy as np
+import pandas as pd
 from scipy import stats as sp_stats
+
+
+def read_files(summaries):
+    """Read a set of files and join to single dataframe."""
+    dfs = list()
+    if not isinstance(summaries, (list, tuple)):
+        summaries = [summaries]
+    for fname in sorted(summaries):
+        dfs.append(pd.read_csv(fname, sep="\t"))
+    return pd.concat(dfs)
 
 
 class _colors:

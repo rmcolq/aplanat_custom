@@ -9,13 +9,8 @@ import pandas as pd
 
 from aplanat import hist
 from aplanat.parsers.bcfstats import parse_bcftools_stats_multi
-from aplanat.report import HTMLReport, HTMLSection
+from aplanat.report import _maybe_new_report, HTMLReport
 from aplanat.util import Colors
-
-
-def _maybe_new_report(report):
-    """Create a new report section, or returns input."""
-    return report if isinstance(report, HTMLSection) else HTMLSection()
 
 
 def variant_counts_table(

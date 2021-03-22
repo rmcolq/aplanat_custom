@@ -12,6 +12,16 @@ from jinja2 import Template
 import markdown
 
 
+def _maybe_new_report(section, require_keys=False):
+    """Create a new report section, or returns input."""
+    if section is None:
+        section = HTMLSection(require_keys=require_keys)
+    else:
+        if not isinstance(section, HTMLSection):
+            raise TypeError("`section` should be an `HTMLSection`.")
+    return section
+
+
 class HTMLSection(OrderedDict):
     """A section of a report.
 
@@ -177,7 +187,7 @@ class HTMLReport(HTMLSection):
             """  # noqa
         )
 
-    def add_section(self, key=None, section=None):
+    def add_section(self, key=None, section=None, require_keys=False):
         """Add a section (grouping of items) to the report.
 
         :param key: unique key for section.
@@ -188,11 +198,7 @@ class HTMLReport(HTMLSection):
         """
         if key is None:
             key = str(uuid.uuid4())
-        if section is None:
-            section = HTMLSection(require_keys=self.require_keys)
-        else:
-            if not isinstance(section, HTMLSection):
-                raise TypeError("`section` should be an `HTMLSection`.")
+        section = _maybe_new_report(section, require_keys=require_keys)
         self.sections[key] = section
         return self.sections[key]
 
