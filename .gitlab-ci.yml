@@ -1,16 +1,22 @@
+include:
+    - project: "epi2melabs/ci-templates"
+      file: "push-github.yaml"
+    - project: "epi2melabs/ci-templates"
+      file: "push-conda.yaml"
+
 image: ${UBUNTUIMAGE}:18.04
 
 stages:
     - test
     - build
-    - predeploy
-    - deploy
-    - postdeploy
+    - prerelease
+    - release
+    - postrelease
 
 # Insist that the version in __init__.py matches the git tag
 .check-versions: &check-versions |
     PYVER="v"$(grep "__version__ = " ${CI_PROJECT_NAME}/__init__.py | awk '{gsub("\"","",$3); print $3}')
-    TAGVER="v0.3.3"
+    TAGVER=${CI_COMMIT_TAG}
     if [[ "${PYVER}" != "${TAGVER}" ]]; then
         echo "Mismatching TAG and PACKAGE versions:"
         echo " -     TAG:'$TAGVER'"
@@ -46,7 +52,7 @@ test:
             - dist/*.tar.gz
 
 deploy-checks:
-    stage: predeploy
+    stage: prerelease
     script:
         - *check-versions
         - *check-changelog
@@ -54,7 +60,7 @@ deploy-checks:
         - tags
 
 deploy:pypi:
-    stage: deploy
+    stage: release
     before_script:
         - apt-get update -qq && apt-get install -y -qq
           python3-all-dev python-virtualenv
@@ -65,51 +71,16 @@ deploy:pypi:
     only:
         - tags
 
-deploy-conda:
-    stage: deploy
+conda:
+    extends: .deploy-conda
     before_script:
-        - wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-        - bash Miniconda3-latest-Linux-x86_64.sh -b -p /tmp/miniconda
-        - source /tmp/miniconda/bin/activate
-        - conda init
-        - conda install -y anaconda-client conda-build conda-verify
-    script:
         - cd conda
-        - CONDA_PKG=${CI_PROJECT_NAME} CONDA_PKG_VERSION=${CI_COMMIT_TAG} conda build -c bioconda -c conda-forge .
-        - anaconda login --username $CONDA_USERNAME --password $CONDA_PASSWORD
-        - anaconda upload /tmp/miniconda/conda-bld/noarch/${CI_PROJECT_NAME}-*.tar.bz2
-    only:
-        - tags
-
-push-github:
-    stage: deploy
-    before_script:
-        - apt-get update -qq && apt-get install -y -qq git python3-pip
-        - mkdir ~/.ssh/
-        - cp $LABS_BOT_GH_KEY ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-        - echo -e "Host github.com\n\tStrictHostKeyChecking no\n\tHostname ssh.github.com\n\tPort 443\n\n" > ~/.ssh/config
-        - git config --global user.email "epi2melabs@nanoporetech.com"
-        - git config --global user.name "epi2melabs-bot"
-    script:
-        # Push master and tag to github
-        - git remote add ont ${CI_REPOSITORY_URL} || true
-        - git remote add github git@github.com:epi2me-labs/${CI_PROJECT_NAME}.git || true
-        - git fetch ont dev --tags
-        - git fetch ont master
-        - git fetch github master
-        - git checkout --track github/master || git checkout master
-        - git merge ${CI_COMMIT_TAG}
-        - git push github master
-        - git push github ${CI_COMMIT_TAG}
-        # Make a github release page
-        - pip3 install git+https://github.com/epi2me-labs/github_release.git
-        - github_release ${CI_PROJECT_NAME} ${CI_COMMIT_TAG} CHANGELOG.md ${LABS_BOT_GH_TOKEN}
     only:
         - tags
 
 
 deploy:trigger:
-    stage: postdeploy
+    stage: postrelease
     trigger: epi2melabs/nanolabs
     only:
         - tags
