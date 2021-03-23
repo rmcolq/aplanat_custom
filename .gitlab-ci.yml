@@ -51,15 +51,21 @@ test:
             - demo.html
             - dist/*.tar.gz
 
+.release-stub:
+    only:
+        - /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/
+    except:
+        - branches
+
 deploy-checks:
+    extends: .release-stub
     stage: prerelease
     script:
         - *check-versions
         - *check-changelog
-    only:
-        - tags
 
 deploy:pypi:
+    extends: .release-stub
     stage: release
     before_script:
         - apt-get update -qq && apt-get install -y -qq
@@ -68,21 +74,18 @@ deploy:pypi:
         - make pypi_build/bin/activate
         - source pypi_build/bin/activate
         - twine upload --non-interactive dist/*.tar.gz
-    only:
-        - tags
 
 conda:
-    extends: .deploy-conda
+    extends:
+        - .deploy-conda
+        - .release-stub
     before_script:
         - export CONDA_PKG=${CI_PROJECT_NAME}
-        - export CONDA_PKG_VERSION=${CI_COMMIT_TAG}
+        - export CONDA_PKG_VERSION=${CI_COMMIT_TAG/v/}
         - cd conda
-    only:
-        - tags
 
 
 deploy:trigger:
+    extends: .release-stub
     stage: postrelease
     trigger: epi2melabs/nanolabs
-    only:
-        - tags
