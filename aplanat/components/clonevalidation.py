@@ -170,11 +170,13 @@ class CloneValidationQC(HTMLSection):
         with open(assembly_maf) as maf:
             while True:
                 line = maf.readline()
+                print(line)
                 if line.startswith('#'):
                     continue
                 elif line.startswith('a'):
                     r1 = maf.readline().split()[1:5]
                     r2 = maf.readline().split()[1:5]
+                    maf.readline()
                     records.append(r1 + r2)
                 elif line == "":
                     break
