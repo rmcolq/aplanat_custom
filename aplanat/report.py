@@ -225,6 +225,47 @@ class HTMLReport(HTMLSection):
             outfile.write(self.render())
 
 
+class WFReport(HTMLReport):
+    """Report template for epi2me-labs/wf* workflows."""
+
+    def __init__(self, title, workflow, require_keys=False):
+        """Initialize the report item collection.
+
+        :param workflow: workflow name (e.g. wf-hap-snps)
+        :param title: report title.
+        :param require_keys: require keys when adding items.
+        """
+        self.workflow = workflow
+        lead = (
+            "Results generated through the {} Nextflow workflow "
+            "provided by Oxford Nanopore Technologies.".format(workflow))
+        super().__init__(title=title, lead=lead, require_keys=require_keys)
+        self.tail_key = str(uuid.uuid4())
+
+    def render(self):
+        """Generate HTML report containing figures."""
+        # delete and re-add the tail (in case we are called twice,
+        # and something was added).
+        try:
+            del self.sections[self.tail_key]
+        except KeyError:
+            pass
+        self.add_section(key=self.tail_key).markdown("""
+### About
+
+**Oxford Nanopore Technologies products are not intended for use for health
+assessment or to diagnose, treat, mitigate, cure or prevent any disease or
+condition.**
+
+This report was produced using the
+[epi2me-labs/{0}](https://github.com/epi2me-labs/{0}).  The
+workflow can be run using `nextflow epi2me-labs/{0} --help`
+
+---
+""".format(self.workflow))
+        return super().render()
+
+
 def bokeh_table(df, index=True, **kwargs):
     """Generate a bokeh table from a pandas dataframe."""
     columns = [TableColumn(field=x, title=x) for x in df.columns]
