@@ -309,7 +309,7 @@ class PlotMappingStats(HTMLSection):
     def plot_base_pairs(self, data):
         """Plot_base_pairs."""
         base_pairs = {
-            self.abbreviate_name(k, data): v['base_pairs'] 
+            self.abbreviate_name(k, data): v['base_pairs']
             for k, v in data.items()
         }
 
