@@ -179,13 +179,11 @@ class PlotMappingStats(HTMLSection):
 
         text = (
             "This tab contains visualisations of "
-            "query-coverage (i.e. the proportion of "
-            "the read that was aligned excluding "
-            "soft-clipping). The cov80 percent "
-            "gives the total number of reads for which "
-            "80 percent or more of their length was "
-            "aligned. [Note]: Reference depth plots "
-            "will be introduced in an update."
+            "reference-coverage (i.e. the proportion of "
+            "the reference that a given alignment covers "
+            "ex. soft-clipping). The cov80 gives the number "
+            "of alignments which cover more than 80 percent "
+            "of the reference."
         )
         plots = [
             [self.get_description(text)],
@@ -310,12 +308,18 @@ class PlotMappingStats(HTMLSection):
 
     def plot_base_pairs(self, data):
         """Plot_base_pairs."""
-        base_pairs = {k: v['base_pairs'] for k, v in data.items()}
+        base_pairs = {
+            self.abbreviate_name(k, data): v['base_pairs']
+            for k, v in data.items()
+        }
 
         data = pd.Series(base_pairs).reset_index(
             name='value').rename(columns={'index': 'group'})
         data['angle'] = data['value']/data['value'].sum() * 2 * math.pi
-        data['color'] = Category20c[len(base_pairs)]
+        if Category20c.get(len(base_pairs)):
+            data['color'] = Category20c[len(base_pairs)]
+        else:
+            data['color'] = Colors.light_cornflower_blue
         data['percentage'] = (data['value']/data['value'].sum())
         data['megabases'] = (data['value'] / 1000000)
 
@@ -345,6 +349,7 @@ class PlotMappingStats(HTMLSection):
         plot.axis.visible = False
         plot.grid.grid_line_color = None
         plot.min_border_left = 0
+        plot.legend.visible = True
 
         hover = plot.select({'type': HoverTool})
         hover.tooltips = [
@@ -593,7 +598,7 @@ class PlotMappingStats(HTMLSection):
         """plot_detected_vs_undetected_references."""
         names = ['Detected', 'Not Detected']
         detected = value['observed_reference_count']
-        undetected = len(counts_df) - detected
+        undetected = len(counts_df)
         data = [detected, undetected]
 
         plot = figure(
@@ -635,6 +640,21 @@ class PlotMappingStats(HTMLSection):
         """Style plots."""
         plot.margin = (10, 10, 40, 10)
         plot.background_fill_alpha = 0
+
+    def abbreviate_name(self, name, data):
+        """Abbreviate the name."""
+        item = data[name]
+        fasta = item['fasta']
+        barcode = item['barcode']
+        run_id = item['run_id']
+
+        if len(fasta) > 20:
+            fasta = fasta[0:20] + '...'
+
+        if len(run_id) > 20:
+            run_id = run_id[0:20] + '...'
+
+        return f"{fasta} / {barcode} / {run_id}"
 
     def add_plot_title(self, plot, data, *extra_lines):
         """Annotate plot with titles."""
