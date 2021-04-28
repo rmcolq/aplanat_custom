@@ -228,13 +228,21 @@ class HTMLReport(HTMLSection):
 class WFReport(HTMLReport):
     """Report template for epi2me-labs/wf* workflows."""
 
-    def __init__(self, title, workflow, require_keys=False):
+    def __init__(
+            self, title, workflow, commit=None, revision=None,
+            require_keys=False):
         """Initialize the report item collection.
 
         :param workflow: workflow name (e.g. wf-hap-snps)
         :param title: report title.
         :param require_keys: require keys when adding items.
         """
+        if commit is None:
+            commit = "unknown"
+        if revision is None:
+            revision = "unknown"
+        self.wf_commit = commit
+        self.wf_revision = revision
         self.workflow = workflow
         lead = (
             "Results generated through the {} Nextflow workflow "
@@ -253,16 +261,20 @@ class WFReport(HTMLReport):
         self.add_section(key=self.tail_key).markdown("""
 ### About
 
-**Oxford Nanopore Technologies products are not intended for use for health
-assessment or to diagnose, treat, mitigate, cure or prevent any disease or
-condition.**
-
 This report was produced using the
 [epi2me-labs/{0}](https://github.com/epi2me-labs/{0}).  The
 workflow can be run using `nextflow epi2me-labs/{0} --help`
 
+**Version details** *Revision*: {1} *Git Commit*: {2}
+
+
+***Oxford Nanopore Technologies products are not intended for use for health
+assessment or to diagnose, treat, mitigate, cure or prevent any disease or
+condition.***
+
+
 ---
-""".format(self.workflow))
+""".format(self.workflow, self.wf_revision, self.wf_commit))
         return super().render()
 
 
