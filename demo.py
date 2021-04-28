@@ -13,8 +13,8 @@ y = np.random.normal(size=2000)
 sorted_xy = [np.sort(x), np.sort(x)]
 
 # Start a report
-report = report.HTMLReport(
-    "Aplanat Demo", "A demonstration of aplanat and its report generation API",
+report = report.WFReport(
+    "Aplanat Demo", "aplanat-demo", revision='test', commit='test',
     require_keys = False)  # set True to require keys on item addition
 
 # The report is an ordered dictionary, so we can add placeholders to
