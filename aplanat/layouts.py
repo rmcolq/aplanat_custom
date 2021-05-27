@@ -64,11 +64,12 @@ def facet_grid(
 
     plots = list()
     for (px, fx), (py, fy) in facet_products:
+        d = df
         if fx is not None and fy is not None:
             d = df.loc[(df[facet_x] == fx) & (df[facet_y] == fy)]
         elif fx is not None:
             d = df.loc[df[facet_x] == fx]
-        else:
+        elif fy is not None:
             d = df.loc[df[facet_y] == fy]
 
         x_data = list()
@@ -217,6 +218,8 @@ def make_facet_labels(
         p.toolbar.active_drag = None
         p.x_range = Range1d(start=0.0, end=1.0)
         p.y_range = Range1d(start=0.0, end=1.0)
+        if label is None:
+            label = ""
         p.add_layout(
             Label(
                 x=0.5, y=0.5, text=label, text_align='center',
