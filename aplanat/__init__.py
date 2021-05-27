@@ -2,8 +2,10 @@
 
 import argparse
 import importlib
+import json
 import warnings
 
+from bokeh import embed
 from bokeh.colors import RGB
 import bokeh.io as bkio
 from bokeh.layouts import gridplot
@@ -88,6 +90,21 @@ def show(plot, background=None):
         for colours, child in zip(orig_colours, children):
             child.background_fill_color = colours[0]
             child.border_fill_color = colours[1]
+
+
+def export_jsx(plot, fname):
+    """Export plot to a JSX (react) file.
+
+    :param plot: bokeh plot object.
+    :param fname: export filename.
+    """
+    with open(fname, "w") as fh:
+        head = "const plotJson = "
+        data = embed.json_item(plot)
+        fh.write(head)
+        fh.write(json.dumps(data))
+        fh.write("\n")
+        fh.write("export default plotJson")
 
 
 def grid(plots, ncol=4, display=True, **kwargs):
