@@ -6,15 +6,19 @@ import pandas as pd
 from bokeh.layouts import gridplot
 
 import aplanat
-from aplanat import annot, bars, bio, graphics, hist, points, report, spatial
+from aplanat import annot, bars, bio, graphics, hist, points, report, spatial, util
+
+util.set_basic_logging()
+logger = util.get_named_logger("Aplanat Demo")
 
 x = np.random.normal(size=2000)
 y = np.random.normal(size=2000)
 sorted_xy = [np.sort(x), np.sort(x)]
 
 # Start a report
-report = report.WFReport(
-    "Aplanat Demo", "aplanat-demo", revision='test', commit='test',
+logger.info("Start a report")
+report = report.HTMLReport(
+    "Aplanat Demo", "aplanat-demo",
     require_keys = False)  # set True to require keys on item addition
 
 # The report is an ordered dictionary, so we can add placeholders to
@@ -24,9 +28,11 @@ report.markdown("placeholder", key="simple preamble")
 # We can also add additional sections. These function as their own mini-report
 # and each section is rendered in its entirety in the order it was added.
 # (The main HTMLReport is logically the first section).
+logger.info("Adding gallery")
 gallery = report.add_section(key="additional_section")
 
 # Adding a plot
+logger.info("Adding points plot")
 report.plot(points.points(sorted_xy, sorted_xy[::-1]), key="line_plot")
 
 # Using placeholder is more explicit, and checks will be made before
@@ -35,30 +41,38 @@ report.placeholder("histogram preamble")
 
 # There's no need to provide key (unless require_keys is set). Items added
 # without a key cannot be replaced however.
+logger.info("Adding histogram")
 h = hist.histogram([x - 1, y + 1], colors=['red', 'green'])
 h = annot.marker_vline(h, np.mean(x) - 1, label='x values - 1', color='red', text_baseline='bottom')
 h = annot.marker_vline(h, np.mean(y) + 1, label='y values + 1', color='green', text_baseline='top')
 report.plot(h)
 
 # To delete an item, just delete the key
+logger.info("Deleting an item for fun")
 report.markdown("Garbage", key='garbage')
 del report['garbage']
 
 # Add more plots
+logger.info("Adding heatmap")
 report.placeholder("heatmap preamble")
 report.plot(spatial.heatmap2(x, y))
 
 # Add a data table
+logger.info("Adding table")
 report.placeholder("table preamble")
 df = pd.DataFrame({'x':x, 'y':y})
-report.table(df, index=False)
 report.markdown(
-    "Small tables have their `height` manipulated to shrink by default."
-    "This can be overridden with `shrink=False`.")
+    "Here's a table:")
 df = df[0:5]
-report.table(df, key='Table with auto_height', height=200)
+report.table(df, key='Table with auto_height', pagination='false', sortable='false')
+report.markdown(
+    "Here's a second table with more data, pagination, and searchable")
+df = pd.DataFrame({'x':y, 'y':x})
+report.table(df, key='Table with more data and pagination', height=200)
+
 
 # boxplot series with discretised x
+logger.info("Adding boxplot")
 report.placeholder("boxplot preamble")
 x_discrete = np.around(x, 0)
 x_str = [str(x) for x in np.abs(x_discrete)]
@@ -70,6 +84,7 @@ report.plot(
 
 # Gallery
 gallery.placeholder("gallery preamble")
+logger.info("Adding some infographics")
 exec_summary = graphics.InfoGraphItems()
 exec_summary.append('Total reads', 1000000, 'angle-up', '')
 exec_summary.append('Total yield', 1e9, 'signal', 'b')
@@ -78,6 +93,7 @@ exec_summary.append('Mean qscore (pass)', 14, 'thumbs-up', '')
 plot = graphics.infographic(exec_summary.values())
 gallery.plot(plot)
 
+logger.info("Adding karyogram")
 chrom_data = deepcopy(bio._chrom_data_)
 chrom_data['chrom'] = chrom_data['chrom'].apply(lambda x: 'chr' + x)
 chroms = np.random.choice(chrom_data['chrom'], size=10000)
@@ -90,10 +106,11 @@ gallery.plot(plot)
 
 # Trying to render now will raise ValueError because the placeholders are
 # not filled in
+logger.info("Checking empty pladeholder validation")
 try:
     report.render()
 except ValueError as e:
-    print("Caught error as expected:", e)
+    logger.exception("Caught error as expected")
 
 # Fill in the placeholders
 report.markdown("""
@@ -135,4 +152,5 @@ Assortment of possibilities:
 """, "gallery preamble")
 
 # write the output, implicitely calls .render()
+logger.info("Rendering report")
 report.write("demo.html")

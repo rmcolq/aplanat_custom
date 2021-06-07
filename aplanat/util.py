@@ -1,9 +1,34 @@
 """Utility functions for aiding plotting."""
 
+import logging
+
 from bokeh import palettes
 import numpy as np
 import pandas as pd
 from scipy import stats as sp_stats
+
+
+def get_named_logger(name):
+    """Create a logger with a name.
+
+    :param name: name of logger.
+    """
+    logger = logging.getLogger('{}.{}'.format(__package__, name))
+    logger.name = name
+    return logger
+
+
+def set_basic_logging(level=logging.INFO):
+    """Set basic log formatting.
+
+    :returns: logger instance.
+    """
+    logging.basicConfig(
+        format='[%(asctime)s - %(name)s] %(message)s',
+        datefmt='%H:%M:%S', level=level)
+    logger = logging.getLogger(__package__)
+    logger.setLevel(level)
+    return logger
 
 
 def read_files(summaries):
