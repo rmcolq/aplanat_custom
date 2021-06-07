@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `facet_grid` function can now create a single-facet plot.
 - Helper function to export JSX file for import into MDX markdown.
+- Table class that uses simple table instead of bokeh
 
 ## [v0.3.12]
 ### Added
