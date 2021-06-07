@@ -65,18 +65,20 @@ class HTMLSection(OrderedDict):
         """
         self._add_item(plot, key=key)
 
-    def table(self, df, index=True, key=None, shrink=True, **kwargs):
+    def table(self, data_frame, index=False, key=None, searchable=True,
+              paging=True, sortable=True, **kwargs):
         """Add a pandas dataframe to the report.
 
         :param df: pandas dataframe instance.
         :param index: include dataframe index in output.
         :param key: unique key for item.
         :param shrink: shrink wrap the table to avoid whitespace.
-        :param kwargs: passed to bokeh DataTable.
+        :param kwargs:
+                       https://github.com/fiduswriter/Simple-DataTables/wiki/API
         """
-        plot = bokeh_table(df, index=index, **kwargs)
-        plot.height = min(plot.height, 25*(len(df) + 1))
-        self.plot(plot, key)
+        table = Table(data_frame, index=index, searchable=searchable,
+                      paging=paging, sortable=sortable, **kwargs)
+        self._add_item(table, key=key)
 
     def markdown(self, text, key=None):
         """Add markdown formatted text to the report.
@@ -104,7 +106,13 @@ class HTMLSection(OrderedDict):
     def _table_components(self):
         """Return html script and div for tables."""
         # TODO: reimplement `.table()` to not use bokeh?
-        pass
+        scripts = list()
+        divs = dict()
+        tables = {k: v for k, v in self.items() if isinstance(v, Table)}
+        if len(tables) > 0:
+            for k, v in tables.items():
+                divs[k] = v.div
+        return scripts, divs
 
     def _extra_components(self):
         """Return additional script and divs."""
@@ -121,6 +129,9 @@ class HTMLSection(OrderedDict):
         scripts.extend(plot_scripts)
         specials.update(plot_divs)
         # TODO: add special handing for new tables?
+        table_scripts, table_divs = self._table_components()
+        scripts.extend(table_scripts)
+        specials.update(table_divs)
         # retrieve any extra specials
         extra_scripts, extra_divs = self._extra_components()
         scripts.extend(extra_scripts)
@@ -173,7 +184,8 @@ class HTMLReport(HTMLSection):
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>{{ title }}</title>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
                     {{ resources }}
                     {{ script }}
                 </head>
@@ -286,3 +298,58 @@ def bokeh_table(df, index=True, **kwargs):
     return DataTable(
             columns=columns, source=ColumnDataSource(df), index_position=None,
             **kwargs)
+
+
+class Table():
+    """A table report component."""
+
+    def __init__(self, data_frame, index, **kwargs):
+        """Initialize table component.
+
+        :param dataframe: dataframe to turn in to simple table.
+        """
+        template = Template(
+            """\
+            <style>
+            #{{ table_id }}{
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            }
+            #{{ table_id }} td, #{{ table_id }} th {
+            border: 1px solid #ddd;
+            padding: 4px;
+            }
+            #{{ table_id }} tr:nth-child(even){background-color: #f2f2f2;}
+            #{{ table_id }} tr:hover {background-color: #90C5E7;}
+            #{{ table_id }} th {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            text-align: left;
+            background-color: #0084A9 ;
+            color: white;
+            }
+            </style>
+
+                    <body>
+                        {{ dataframe }}
+                    </body>
+                   <script defer type="text/javascript">
+                        let {{ table_id|safe }}=new simpleDatatables.DataTable(
+                            "#{{ table_id }}",{
+                         {% for k, v in kwargs.items() %}
+                            {{ k }}: {{ v }},
+                        {% endfor %}
+                        });
+                    </script>
+
+            """)
+        for key, val in kwargs.items():
+            if isinstance(val, bool):
+                kwargs[key] = str(val).lower()
+        key = str(uuid.uuid4())
+        self.div = template.render(dataframe=data_frame.to_html(
+                                   table_id=str('a'+key[0:5]),
+                                   index=index),
+                                   table_id=str('a'+key[0:5]),
+                                   kwargs=kwargs)
