@@ -3,6 +3,8 @@
 import logging
 
 from bokeh import palettes
+from bokeh.models import Label
+from bokeh.plotting import figure
 import numpy as np
 import pandas as pd
 from scipy import stats as sp_stats
@@ -145,3 +147,58 @@ def choose_palette(ncolours):
         raise ValueError(
             "Cannot create colour palette with more than 256 colours.")
     return cols
+
+
+def emptyPlot(**kwargs):
+    """Empty plot for when all else fails.
+
+    :param kwargs: kwargs for bokeh figure.
+
+    :returns: a bokeh plot.
+    """
+    p = figure(
+        plot_width=300,
+        plot_height=300,
+        **kwargs
+    )
+    failLabel = Label(x=125, y=125, x_units='screen',
+                      y_units='screen',
+                      text=str('Failed to plot'),
+                      text_font_style='italic',
+                      text_align='center')
+
+    p.circle([1, 2], [3, 4], fill_color='white', line_color='white')
+    p.add_layout(failLabel)
+    return p
+
+
+def plot_wrapper(func):
+    """Test for function and output empty graph if fails.
+
+    :param func:  name of plotting function from aplanat.
+    :param args: the arguments provided.
+    :param kwargs: other optional key word arguments.
+
+    :returns: plot.
+
+    """
+    def wrapper_accepting_arguments(*args, **kwargs):
+        """Argument wrapper for decorator."""
+        logger = get_named_logger('PlotWrap')
+        try:
+            p = (func(*args, **kwargs))
+            return p
+        except Exception as e:
+
+            try:
+                p = emptyPlot(**kwargs)
+                logger.exception('Plotting user plot failed with: '+str(e))
+                return p
+
+            except Exception as f:
+                p = emptyPlot()
+                logger.exception(
+                    'Plotting templated Empty plot failed with: ' + str(f))
+                return p
+
+    return wrapper_accepting_arguments

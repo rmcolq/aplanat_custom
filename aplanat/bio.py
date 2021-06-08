@@ -8,6 +8,8 @@ from bokeh.plotting import figure
 import numpy as np
 import pandas as pd
 
+from aplanat import util
+
 _chrom_data_ = """
 chrom length
 1 249250621
@@ -38,6 +40,7 @@ Y 59373566
 _chrom_data_ = pd.read_csv(StringIO(_chrom_data_), delimiter=" ")
 
 
+@util.plot_wrapper
 def karyotype(
         x_datas, y_datas, names=None, colors=None, alpha=0.2,
         chrom_data=_chrom_data_, **kwargs):

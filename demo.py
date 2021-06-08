@@ -104,6 +104,23 @@ for chrom in chroms:
 plot = bio.karyotype([positions], [chroms], chrom_data=chrom_data)
 gallery.plot(plot)
 
+report.placeholder("failed plot preamble")
+logger.info("Adding failed plot")
+group = ("x1", "x2", "x3", 4, "x5")
+count = ('wrong data')
+
+
+@util.plot_wrapper
+def decorator_example(groups, counts):
+    """Examplify a decorator."""
+    p = bars.simple_bar(groups, counts)
+    return p
+
+
+plot = decorator_example(group, count)
+report.plot(plot)
+
+
 # Trying to render now will raise ValueError because the placeholders are
 # not filled in
 logger.info("Checking empty pladeholder validation")
@@ -144,12 +161,19 @@ report.markdown("""
 A series of boxplots using either a continuous or categorical grouping:
 """, "boxplot preamble")
 
+report.markdown("""
+### Failed Plot
+
+When plot fails:
+""", "failed plot preamble")
+
 
 gallery.markdown("""
 ### Gallery
 
 Assortment of possibilities:
 """, "gallery preamble")
+
 
 # write the output, implicitely calls .render()
 logger.info("Rendering report")

@@ -1,8 +1,10 @@
 """Creation of line plots."""
 
+from aplanat import util
 from aplanat.base import simple
 
 
+@util.plot_wrapper
 def line(
         x_datas, y_datas, names=None, colors=None,
         xlim=(None, None), ylim=(None, None),
@@ -33,6 +35,7 @@ def line(
         **kwargs)
 
 
+@util.plot_wrapper
 def steps(
         x_datas, y_datas, names=None, colors=None,
         xlim=(None, None), ylim=(None, None), mode='before',

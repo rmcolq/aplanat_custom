@@ -1,8 +1,10 @@
 """Plotting points."""
 
+from aplanat import util
 from aplanat.base import simple
 
 
+@util.plot_wrapper
 def points(
         x_datas, y_datas, names=None, colors=None,
         xlim=(None, None), ylim=(None, None),

@@ -11,6 +11,7 @@ import pandas as pd
 from aplanat import util
 
 
+@util.plot_wrapper
 def heatmap(x, y, z, name=None, **kwargs):
     """Create a heatmap from three columns.
 
@@ -61,6 +62,7 @@ def heatmap(x, y, z, name=None, **kwargs):
     return p
 
 
+@util.plot_wrapper
 def heatmap2(
         x, y, name=None, x_bins=50, y_bins=50, log=False,
         xlim=(None, None), ylim=(None, None), zlim=(None, None),

@@ -3,9 +3,11 @@
 from bokeh.models import Range1d
 from bokeh.plotting import figure
 
+from aplanat import util
 from aplanat.util import Limiter
 
 
+@util.plot_wrapper
 def simple(
         x_datas, y_datas, names=None, colors=None,
         xlim=(None, None), ylim=(None, None), style='line',
