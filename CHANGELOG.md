@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Helper function to export JSX file for import into MDX markdown.
 - Table class that uses simple table instead of bokeh.
 - Add logging helper functions to util.
+- Decorator which plots a null graph if plotting function fails.
 
 ## [v0.3.12]
 ### Added
