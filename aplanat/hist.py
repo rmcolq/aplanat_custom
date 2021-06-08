@@ -4,9 +4,11 @@ from bokeh.models import Range1d
 from bokeh.plotting import figure
 import numpy as np
 
+from aplanat import util
 from aplanat.util import Limiter
 
 
+@util.plot_wrapper
 def histogram(
         datas, weights=None, names=None, colors=None,
         normalize=False, bins=30, binwidth=None,

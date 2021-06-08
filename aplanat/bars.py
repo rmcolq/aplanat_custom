@@ -9,6 +9,7 @@ import pandas as pd
 from aplanat import util
 
 
+@util.plot_wrapper
 def single_hbar(values, classes, colors, **kwargs):
     """Create a plot with a single set of stacked horizontal bars.
 
@@ -79,6 +80,7 @@ def simple_bar(
     return p
 
 
+@util.plot_wrapper
 def boxplot_series(
         groups, values, xlim=(None, None), ylim=(None, None),
         **kwargs):
