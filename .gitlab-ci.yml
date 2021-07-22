@@ -52,10 +52,8 @@ test:
             - dist/*.tar.gz
 
 .release-stub:
-    only:
-        - /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/
-    except:
-        - branches
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
 
 deploy-checks:
     extends: .release-stub
@@ -83,7 +81,6 @@ conda:
         - export CONDA_PKG=${CI_PROJECT_NAME}
         - export CONDA_PKG_VERSION=${CI_COMMIT_TAG/v/}
         - cd conda
-
 
 deploy:trigger:
     extends: .release-stub
