@@ -32,7 +32,7 @@ def version_table(versions, header=_version_header, report=None):
     report.markdown(header)
 
     if os.path.isdir(versions):
-        versions = [os.path.join(versions, x) for x in os.listdir()]
+        versions = [os.path.join(versions, x) for x in os.listdir(versions)]
     elif os.path.isfile(versions):
         versions = [versions]
     else:
@@ -70,7 +70,7 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--versions",
-        help="Show sample counts.")
+        help="Headerless CSV containing 'software,version' or directory of such files.")
     parser.add_argument(
         "--output", default="simple_components_report.html",
         help="Output HTML file.")
