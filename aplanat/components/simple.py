@@ -70,7 +70,9 @@ def argparser():
         add_help=False)
     parser.add_argument(
         "--versions",
-        help="Headerless CSV containing 'software,version' or directory of such files.")
+        help=(
+            "Headerless CSV containing 'software,version', "
+            "or directory of such files."))
     parser.add_argument(
         "--output", default="simple_components_report.html",
         help="Output HTML file.")
