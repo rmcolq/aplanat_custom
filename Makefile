@@ -5,7 +5,7 @@ PYTHON ?= python3
 IN_VENV=. ./venv/bin/activate
 
 venv/bin/activate:
-	test -d venv || virtualenv venv --python=$(PYTHON)
+	test -d venv || $(PYTHON) -m venv venv
 	${IN_VENV} && pip install pip --upgrade
 	${IN_VENV} && pip install -r requirements.txt
 
@@ -18,11 +18,12 @@ test: venv/bin/activate
 		--import-order-style google --application-import-names aplanat \
 		--statistics
 	# demo should run without error
-	${IN_VENV} && python demo.py
+	${IN_VENV} && python setup.py install
+	${IN_VENV} && aplanat demo
 
 IN_BUILD=. ./pypi_build/bin/activate
 pypi_build/bin/activate:
-	test -d pypi_build || virtualenv pypi_build --python=python3 --prompt "(pypi) "
+	test -d pypi_build || $(PYTHON) -m venv pypi_build --prompt "(pypi) "
 	${IN_BUILD} && pip install pip --upgrade
 	${IN_BUILD} && pip install --upgrade pip setuptools twine wheel readme_renderer[md] keyrings.alt
 

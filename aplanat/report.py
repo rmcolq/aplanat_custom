@@ -1,6 +1,7 @@
 """Report building from multiple items."""
 
 from collections import OrderedDict
+import textwrap
 import uuid
 
 from bokeh.embed import components
@@ -83,11 +84,14 @@ class HTMLSection(OrderedDict):
     def markdown(self, text, key=None):
         """Add markdown formatted text to the report.
 
-        :param text: markdown formatted text.
+        :param text: markdown formatted text. The text will be dedented before
+            use so it it safe to use triple-quoted strings indented to match
+            code indentation.
         :param key: unique key for item.
         """
         if text is None or text == '':
             return
+        text = textwrap.dedent(text)
         html = self.md.convert(text)
         self.md.reset()
         self._add_item(html, key=key)

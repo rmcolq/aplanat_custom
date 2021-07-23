@@ -15,6 +15,7 @@ def get_named_logger(name):
 
     :param name: name of logger.
     """
+    name = name.ljust(10)[:10]  # so logging is aligned
     logger = logging.getLogger('{}.{}'.format(__package__, name))
     logger.name = name
     return logger
