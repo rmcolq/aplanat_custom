@@ -4,10 +4,9 @@ import argparse
 import json
 import os
 
-import pandas as pd
-
 from aplanat.report import _maybe_new_report, HTMLReport
 from aplanat.util import get_named_logger
+import pandas as pd
 
 
 _version_header = """
@@ -64,7 +63,7 @@ The table below highlights values of the main parameters used in this analysis.
 def params_table(params, header=_params_header, report=None):
     """Create a workflow parameter report from a JSON file.
 
-    :param versions: Flat JSON file containing key, value pairs 
+    :param versions: Flat JSON file containing key, value pairs
         corresponding to workflow parameter 'key/name,value' pairs.
     :param header: a markdown formatted header.
     :param report: an HTMLSection instance.
