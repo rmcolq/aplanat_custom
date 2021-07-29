@@ -4,9 +4,10 @@ import argparse
 import json
 import os
 
+import pandas as pd
+
 from aplanat.report import _maybe_new_report, HTMLReport
 from aplanat.util import get_named_logger
-import pandas as pd
 
 
 _version_header = """
