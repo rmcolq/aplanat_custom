@@ -11,12 +11,16 @@ from aplanat.report import _maybe_new_report, HTMLReport
 from aplanat.util import Colors, read_files
 
 
-def read_length_plot(seq_summary, min_len=None, max_len=None):
+def read_length_plot(
+        seq_summary, min_len=None,
+        max_len=None, xlim=(0, None)):
     """Create a read length plot.
 
     :param seq_summary: summary data from fastcat.
     :param min_len: minimum length.
     :param max_len: maximum length.
+    :param xlim: tuple for plotting limits (start, end). A value None will
+        trigger calculation from the data.
 
     The minimum and maximum lengths are used only to annotate the plot
     (not filter the data).
@@ -30,7 +34,7 @@ def read_length_plot(seq_summary, min_len=None, max_len=None):
         title="Read length distribution.",
         x_axis_label='Read Length / bases',
         y_axis_label='Number of reads',
-        xlim=(0, 2000))
+        xlim=xlim)
     if min_len is not None:
         length_hist = annot.marker_vline(
             length_hist, min_len,
