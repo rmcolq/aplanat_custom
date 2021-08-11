@@ -5,13 +5,13 @@ import importlib
 import json
 import warnings
 
-from bokeh import embed
 from bokeh.colors import RGB
+from bokeh.embed.util import OutputDocumentFor, standalone_docs_json
 import bokeh.io as bkio
 from bokeh.layouts import gridplot
 from bokeh.plotting import Figure
 
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
@@ -92,6 +92,41 @@ def show(plot, background=None):
             child.border_fill_color = colours[1]
 
 
+def json_item(plot, target=None, theme=None, always_new=True):
+    """Export a plot to a JSON doc.
+
+    :param plot: the Bokeh object to embed.
+    :param target: a div id to embed the model into.
+    :param theme: applies a specified theme.
+    :param always_new: force creation of a new document.
+
+    This is a reimplementation of bokeh.embed.json_item that exposes
+    the `always_new` option and by default sets it to obtain a
+    truly independent plot document.
+    """
+    with OutputDocumentFor(
+            [plot], apply_theme=theme, always_new=always_new) as doc:
+        doc.title = ""
+        docs_json = standalone_docs_json([plot])
+
+    doc_json = list(docs_json.values())[0]
+    root_id = doc_json['roots']['root_ids'][0]
+
+    return {'target_id': target, 'root_id': root_id, 'doc': doc_json}
+
+
+def dump_json(plot, target=None, theme=None, always_new=True):
+    """Create a JSON string representing a plot.
+
+    :param plot: the Bokeh object to embed.
+    :param target: a div id to embed the model into.
+    :param theme: applies a specified theme.
+    :param always_new: force creation of a new document.
+    """
+    data = json_item(plot, target=None, theme=None, always_new=always_new)
+    return json.dumps(data)
+
+
 def export_jsx(plot, fname):
     """Export plot to a JSX (react) file.
 
@@ -99,10 +134,8 @@ def export_jsx(plot, fname):
     :param fname: export filename.
     """
     with open(fname, "w") as fh:
-        head = "const plotJson = "
-        data = embed.json_item(plot)
-        fh.write(head)
-        fh.write(json.dumps(data))
+        fh.write("const plotJson = ")
+        fh.write(dump_json(plot))
         fh.write("\n")
         fh.write("export default plotJson")
 
