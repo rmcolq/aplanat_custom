@@ -7,7 +7,9 @@ from bokeh.layouts import gridplot
 import numpy as np
 import pandas as pd
 
-from aplanat import annot, bars, bio, graphics, hist, points, spatial, util
+import aplanat
+from aplanat import \
+    annot, bars, bio, graphics, hist, lines, points, spatial, util
 from aplanat.report import HTMLReport
 
 
@@ -39,7 +41,17 @@ def main(args):
 
     # Adding a plot
     logger.info("Adding points plot")
-    report.plot(points.points(sorted_xy, sorted_xy[::-1]), key="line_plot")
+    pnt_plot = points.points(sorted_xy, sorted_xy[::-1])
+    report.plot(pnt_plot, key="points_plot")
+
+    # Test we can output a plot to json in a different doc/layout
+    # using embed.json_item() fails in this case
+    logger.info("Testing json export")
+    report.markdown("A simple line plot.")
+    line_plot = lines.line(sorted_xy, sorted_xy[::-1])
+    json_plot = aplanat.dump_json(line_plot)
+    logger.info("Some json: {}...".format(json_plot[:40]))
+    report.plot(gridplot([[line_plot]]), key="lines_plot")
 
     # Using placeholder is more explicit, and checks will be made before
     # rendering that the item has be assigned a real value
