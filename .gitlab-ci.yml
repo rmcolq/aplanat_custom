@@ -4,7 +4,13 @@ include:
     - project: "epi2melabs/ci-templates"
       file: "push-conda.yaml"
 
-image: ${UBUNTUIMAGE}:18.04
+image: ${UBUNTUIMAGE}:20.04
+
+.prep-image: &prep-image |
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -qq
+    apt install -y --no-install-recommends make wget python3-all-dev python3-venv 
+
 
 stages:
     - test
@@ -39,10 +45,8 @@ stages:
 
 test:
     stage: test
-    before_script:
-        - apt-get update -qq && apt-get install -y -qq
-          python3-all-dev python3-venv
     script:
+        - *prep-image
         - make test
         - make docs
         - make sdist
@@ -51,38 +55,43 @@ test:
             - aplanat_demo_report.html
             - dist/*.tar.gz
 
-.release-stub:
-    rules:
-        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
-
 deploy-checks:
-    extends: .release-stub
     stage: prerelease
     script:
         - *check-versions
         - *check-changelog
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
 
 deploy:pypi:
-    extends: .release-stub
     stage: release
-    before_script:
-        - apt-get update -qq && apt-get install -y -qq
-          python3-all-dev python3-venv
     script:
+        - *prep-image
         - make pypi_build/bin/activate
         - source pypi_build/bin/activate
         - twine upload --non-interactive dist/*.tar.gz
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
 
 conda:
     extends:
         - .deploy-conda
-        - .release-stub
+    before_script:
+        - *prep-image
+        - export CONDA_PKG=${CI_PROJECT_NAME}
+        - export CONDA_PKG_VERSION=${CI_COMMIT_TAG/v/}
+        - cd conda
+
+conda-mac:
+    extends:
+        - .deploy-conda-mac
     before_script:
         - export CONDA_PKG=${CI_PROJECT_NAME}
         - export CONDA_PKG_VERSION=${CI_COMMIT_TAG/v/}
         - cd conda
 
 deploy:trigger:
-    extends: .release-stub
     stage: postrelease
     trigger: epi2melabs/nanolabs
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$/'
