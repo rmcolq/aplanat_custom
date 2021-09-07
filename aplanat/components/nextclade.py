@@ -24,7 +24,7 @@ class NextClade(HTMLSection):
                 <script defer="">
                 const data = {{ data }}
                 var nxt = document.querySelector('nxt-table')
-                nxt.data = data
+                nxt.data = data.results
                 </script>
             </nxt-table>
             </div>
