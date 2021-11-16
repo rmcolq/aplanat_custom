@@ -19,3 +19,5 @@ tmp/
 *.gz
 *__pycache__*
 *.fna
+.DS_store/**
+.idea/**

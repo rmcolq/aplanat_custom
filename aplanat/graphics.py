@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 import pkg_resources
 from si_prefix import si_format
+import sigfig
 
 
 class IconRGBA:
@@ -118,7 +119,10 @@ def infographic(items, **kwargs):
         if label in seen:
             continue
         if not isinstance(value, str):
-            value = si_format(value) + unit
+            if unit == '%':
+                value = "{}%".format(sigfig.round(value, 3))
+            else:
+                value = si_format(value) + unit
         seen.add(label)
         width, height = 175, 100
         aspect = height / width
