@@ -28,6 +28,7 @@ requirements:
     - python
     - scipy
     - si-prefix
+    - sigfig
 
 test:
   imports:
