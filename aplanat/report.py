@@ -96,6 +96,28 @@ class HTMLSection(OrderedDict):
         self.md.reset()
         self._add_item(html, key=key)
 
+    def alert(self, title, text, level, key=None):
+        """Add an alert to the report.
+
+        :param title: plain text - emphasis used on report
+        :param text: plain text - the text of the warning
+        :param level: the level of the warning; danger, warning, success, \
+            or info
+        :param key: unique key for item.
+        """
+        levels = ['danger', 'warning', 'success', 'info']
+        if level not in levels:
+            raise ValueError(
+                'The alert level must be one of danger, warning, success, \
+                    or info')
+
+        if text is None or text == '':
+            return
+
+        html = '<div class="alert alert-'+level + \
+            '"><p><strong>'+title+'</strong></p>'+text+'</div>'
+        self._add_item(html, key=key)
+
     def _plot_components(self):
         """Return html script and div tags for bokeh plots."""
         # handle bokeh plots
@@ -151,7 +173,7 @@ class HTMLSection(OrderedDict):
                     raise ValueError(
                         "Placeholder `{}` was not assigned "
                         "a value.".format(k)
-                        )
+                    )
                 # fall back to putting items in directly
                 divs.append(self[k])
         return scripts, divs
@@ -300,8 +322,8 @@ def bokeh_table(df, index=True, **kwargs):
     if index:
         columns = [TableColumn(field="index", title="Feature")] + columns
     return DataTable(
-            columns=columns, source=ColumnDataSource(df), index_position=None,
-            **kwargs)
+        columns=columns, source=ColumnDataSource(df), index_position=None,
+        **kwargs)
 
 
 class Table():
