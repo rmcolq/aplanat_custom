@@ -9,3 +9,4 @@ Pillow
 scipy
 si-prefix
 scikit-learn
+sigfig

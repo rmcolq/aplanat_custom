@@ -109,6 +109,7 @@ def main(args):
     gallery.placeholder("gallery preamble")
     logger.info("Adding some infographics")
     exec_summary = graphics.InfoGraphItems()
+    exec_summary.append('Example', 0.0051, 'angle-up', '%')
     exec_summary.append('Total reads', 1000000, 'angle-up', '')
     exec_summary.append('Total yield', 1e9, 'signal', 'b')
     exec_summary.append('Mean read length', 50e3, 'align-center', 'b')
