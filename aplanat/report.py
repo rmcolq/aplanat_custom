@@ -1,6 +1,7 @@
 """Report building from multiple items."""
 
 from collections import OrderedDict
+from pathlib import Path
 import textwrap
 import uuid
 
@@ -80,6 +81,19 @@ class HTMLSection(OrderedDict):
         table = Table(data_frame, index=index, searchable=searchable,
                       paging=paging, sortable=sortable, **kwargs)
         self._add_item(table, key=key)
+
+    def filterable_table(self, data_frame, index=False, key=None, **kwargs):
+        """Add a filterable dataframe to the report.
+
+        :param data_frame: pandas dataframe instance.
+        :param index: include dataframe index in output.
+        :param key: unique key for item.
+        :param kwargs:
+                        Use DataTables to make filterable per column
+                        https://datatables.net/
+        """
+        table = FilterableTable(data_frame, index=index, **kwargs)
+        self._add_item(table.div, key=key)
 
     def markdown(self, text, key=None):
         """Add markdown formatted text to the report.
@@ -213,6 +227,17 @@ class HTMLReport(HTMLSection):
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" type="text/css" rel="stylesheet">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+    <script
+            src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+            integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"
+            type="text/javascript"></script>
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"
+          type="text/css">
                     {{ resources }}
                     {{ script }}
                 </head>
@@ -380,3 +405,37 @@ class Table():
                                    index=index),
                                    table_id=str('a'+key[0:5]),
                                    kwargs=kwargs)
+
+
+class FilterableTable:
+    """A table report component.
+
+    Make a DataTables table with row search functionality
+    """
+
+    def __init__(self, data_frame, index=False, **kwargs):
+        """Initialize table component.
+
+        :param dataframe: dataframe to turn in to simple table.
+        :param index: whether to include index or not
+        """
+        template = Template(self._get_template())
+
+        for key, val in kwargs.items():
+            if isinstance(val, bool):
+                kwargs[key] = str(val).lower()
+
+        key = str(uuid.uuid4())
+        self.div = template.render(dataframe=data_frame.to_html(
+            table_id=str('a' + key[0:5]),
+            index=index),
+            table_id=str('a' + key[0:5]),
+            kwargs=kwargs)
+
+    def _get_template(self):
+        # The template is quite big so though it belonged in it's own file
+        # Should it go in a separate directory?
+        with open(Path(__file__).parent /
+                  'filterable_table_template.html') as fh:
+            template = fh.read()
+            return template
