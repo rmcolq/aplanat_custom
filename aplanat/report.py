@@ -1,7 +1,6 @@
 """Report building from multiple items."""
 
 from collections import OrderedDict
-from pathlib import Path
 import textwrap
 import uuid
 
@@ -12,6 +11,10 @@ from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.resources import INLINE
 from jinja2 import Template
 import markdown
+import pkg_resources
+
+FILT_TABLE_RESOURCES = [
+    'filterable_table_template.css', 'filterable_table_template.js']
 
 
 def _maybe_new_report(section, require_keys=False):
@@ -82,17 +85,19 @@ class HTMLSection(OrderedDict):
                       paging=paging, sortable=sortable, **kwargs)
         self._add_item(table, key=key)
 
-    def filterable_table(self, data_frame, index=False, key=None, **kwargs):
-        """Add a filterable dataframe to the report.
+    def filterable_table(self, data_frame, index=False, key=None,
+                         table_params=None):
+        """Add a filterable table report component.
 
         :param data_frame: pandas dataframe instance.
         :param index: include dataframe index in output.
         :param key: unique key for item.
-        :param kwargs:
-                        Use DataTables to make filterable per column
-                        https://datatables.net/
+        :param table_params: dict of params for DataTables
+            e.g.:  the following sets column 2 and 4 to 5% width,
+            columnDefs: [ { "width": "5%", "targets": [2, 4] }]
         """
-        table = FilterableTable(data_frame, index=index, **kwargs)
+        table = FilterableTable(data_frame, index=index,
+                                table_params=table_params)
         self._add_item(table.div, key=key)
 
     def markdown(self, text, key=None):
@@ -227,8 +232,6 @@ class HTMLReport(HTMLSection):
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" type="text/css" rel="stylesheet">
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
     <script
             src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
             integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
@@ -399,43 +402,45 @@ class Table():
         for key, val in kwargs.items():
             if isinstance(val, bool):
                 kwargs[key] = str(val).lower()
-        key = str(uuid.uuid4())
-        self.div = template.render(dataframe=data_frame.to_html(
-                                   table_id=str('a'+key[0:5]),
-                                   index=index),
-                                   table_id=str('a'+key[0:5]),
-                                   kwargs=kwargs)
+        key = str(uuid.uuid4()).replace('-', '')
+        key = "a{}".format(key[1:])
+        # html id must not begin with numeric
+
+        self.div = template.render(
+            dataframe=data_frame.to_html(table_id=key, index=index),
+            table_id=key, kwargs=kwargs)
 
 
 class FilterableTable:
-    """A table report component.
+    """A table report component."""
 
-    Make a DataTables table with row search functionality
-    """
-
-    def __init__(self, data_frame, index=False, **kwargs):
+    def __init__(self, data_frame, index=False, table_params=None):
         """Initialize table component.
 
-        :param dataframe: dataframe to turn in to simple table.
+        :param dataframe: dataframe to turn in to filterable table.
         :param index: whether to include index or not
+        :table params: dict of parameters for DataTables
         """
         template = Template(self._get_template())
 
-        for key, val in kwargs.items():
-            if isinstance(val, bool):
-                kwargs[key] = str(val).lower()
+        key = str(uuid.uuid4()).replace('-', '')
+        key = "a{}".format(key[1:])
 
-        key = str(uuid.uuid4())
-        self.div = template.render(dataframe=data_frame.to_html(
-            table_id=str('a' + key[0:5]),
-            index=index),
-            table_id=str('a' + key[0:5]),
-            kwargs=kwargs)
+        if table_params is None:
+            tp = ''
+        else:
+            tp = str(table_params).strip('{}')
+            tp = f"{tp},"
+        self.div = template.render(
+            dataframe=data_frame.to_html(table_id=key, index=index),
+            table_id=key, datatables_params=tp)
 
     def _get_template(self):
-        # The template is quite big so though it belonged in it's own file
-        # Should it go in a separate directory?
-        with open(Path(__file__).parent /
-                  'filterable_table_template.html') as fh:
-            template = fh.read()
-            return template
+        template = ""
+        for res in FILT_TABLE_RESOURCES:
+            fn = pkg_resources.resource_filename(
+                __package__, 'data/{}'.format(res))
+            with open(fn, 'r') as fh:
+                temp_part = fh.read()
+                template += temp_part
+        return template
