@@ -13,6 +13,12 @@ from jinja2 import Template
 import markdown
 import pkg_resources
 
+JS_RESOURCES = [
+    'simple-datatables_latest.js', 'jquery-3.6.0.slim.min.js',
+    'jquery.dataTables.min.js']
+CSS_RESOURCES = [
+    'bootstrap.min.css', 'simple-datatables_latest.css',
+    'font-awesome_5.15.4_min.css', 'jquery.dataTables.min.css']
 FILT_TABLE_RESOURCES = [
     'filterable_table_template.css', 'filterable_table_template.js']
 
@@ -219,40 +225,12 @@ class HTMLReport(HTMLSection):
         self.lead = lead
         self.sections = OrderedDict()
         self.sections['main'] = self
-        self.template = Template(
-            """\
-            <!doctype html>
-            <html lang="en">
-            <head>
-                <meta charset="utf-8">
-                <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <title>{{ title }}</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" type="text/css" rel="stylesheet">
-    <script
-            src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
-            integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"
-            type="text/javascript"></script>
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"
-          type="text/css">
-                    {{ resources }}
-                    {{ script }}
-                </head>
-                <body>
-            <div class="container">
-              <h1>{{ title }}</h1>
-              <p class="lead">{{ lead }}
-            {{ div }}
-                </body>
-            </html>
-            """  # noqa
-        )
+
+        template = pkg_resources.resource_filename(
+            __package__, 'data/report_template.html')
+        with open(template, 'r') as fh:
+            template = fh.read()
+        self.template = Template(template)
 
     def add_section(self, key=None, section=None, require_keys=False):
         """Add a section (grouping of items) to the report.
@@ -271,7 +249,17 @@ class HTMLReport(HTMLSection):
 
     def render(self):
         """Generate HTML report containing figures."""
-        resources = INLINE.render()
+        bokeh_resources = INLINE.render()
+
+        libs = []
+        for resources, stub in (
+                [CSS_RESOURCES, "<style>{}</style>"],
+                [JS_RESOURCES, '<script type="text/javascript">{}</script>']):
+            for res in resources:
+                fn = pkg_resources.resource_filename(
+                    __package__, 'data/{}'.format(res))
+                with open(fn) as fh:
+                    libs.append(stub.format(fh.read()))
 
         all_scripts = list()
         all_divs = list()
@@ -284,7 +272,8 @@ class HTMLReport(HTMLSection):
         divs = '\n'.join(all_divs)
         return self.template.render(
             title=self.title, lead=self.lead,
-            resources=resources, script=script, div=divs)
+            bokeh_resources=bokeh_resources, resources="\n".join(libs),
+            script=script, div=divs)
 
     def write(self, path):
         """Write html report to file."""
