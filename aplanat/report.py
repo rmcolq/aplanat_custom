@@ -18,7 +18,7 @@ JS_RESOURCES = [
     'jquery.dataTables.min.js']
 CSS_RESOURCES = [
     'bootstrap.min.css', 'simple-datatables_latest.css',
-    'font-awesome_5.15.4_min.css', 'jquery.dataTables.min.css']
+    'font-awesome_5.0.8.css', 'jquery.dataTables.min.css']
 FILT_TABLE_RESOURCES = [
     'filterable_table_template.css', 'filterable_table_template.js']
 
