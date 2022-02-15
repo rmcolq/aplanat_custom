@@ -9,71 +9,72 @@ $(document).ready(() => {
 {{ dataframe }}
 <script type="text/javascript">
 
-const onInit = function (e) {
-  const api = this.api();
+(function(){
+    const onInit = function (e) {
+      const api = this.api();
 
-  // For each column
-  api
-    .columns()
-    .eq(0)
-    .each((colIdx) => {
-      // Set the header cell to contain the input element
-      const cell = $('.filters th').eq(
-        $(api.column(colIdx).header()).index(),
-      );
-        // eslint-disable-next-line no-unused-vars
-      const title = $(cell).text();
-      $(cell).html('<input type="text" placeholder="&#xF002; Search" style="font-family:Arial, FontAwesome; width:100%" />');
+      // For each column
+      api
+        .columns()
+        .eq(0)
+        .each((colIdx) => {
+          // Set the header cell to contain the input element
+          const cell = $('.filters_{{ table_id }} th').eq(
+            $(api.column(colIdx).header()).index(),
+          );
+          const title = $(cell).text();
+          $(cell).html('<input type="text" class="fas fa-search" placeholder="&#xF002; Search" style="font-family:FontAwesome 5 Free; width:100%" />');
 
-      // On every keypress in this input
-      $(
-        'input',
-        $('.filters th').eq($(api.column(colIdx).header()).index()),
-      )
-        .off('keyup change')
-        .on('keyup change', function (e) {
-          e.stopPropagation();
+          // On every keypress in this input
+          $(
+            'input',
+            $('.filters_{{ table_id }} th').eq($(api.column(colIdx).header()).index()),
+          )
+            .off('keyup change')
+            .on('keyup change', function (e) {
+              e.stopPropagation();
 
-          // Get the search value
-          $(this).attr('title', $(this).val());
-          const regexr = '({search})'; // $(this).parents('th').find('select').val();
+              // Get the search value
+              $(this).attr('title', $(this).val());
+              const regexr = '({search})';
 
-          const cursorPosition = this.selectionStart;
-          // Search the column for that value
-          api
-            .column(colIdx)
-            .search(
-              this.value !== ''
-                ? regexr.replace('{search}', `(((${this.value})))`)
-                : '',
-              this.value !== '',
-              this.value === '',
-            )
-            .draw();
+              const cursorPosition = this.selectionStart;
+              // Search the column for that value
+              api
+                .column(colIdx)
+                .search(
+                  this.value !== ''
+                    ? regexr.replace('{search}', `(((${this.value})))`)
+                    : '',
+                  this.value !== '',
+                  this.value === '',
+                )
+                .draw();
 
-          $(this)
-            .focus()[0]
-            .setSelectionRange(cursorPosition, cursorPosition);
+              $(this)
+                .focus()[0]
+                .setSelectionRange(cursorPosition, cursorPosition);
+            });
         });
+    };
+
+    $(document).ready(() => {
+      // Setup - add a text input to each header cell
+      $('#{{ table_id }} thead tr')
+        .clone(true)
+        .addClass('filters_{{ table_id }}')
+        .appendTo('#{{ table_id }} thead');
+
+      $('#{{ table_id }}').DataTable({
+        sDom: 'lrtip', // removes search box while still allowing search
+        searching: true,
+        order: [], // Prevent auto sorting
+        pageLength: 30,
+        orderCellsTop: true,
+        fixedHeader: true,
+        {{datatables_params}}
+        initComplete: onInit,
+      });
     });
-};
-
-$(document).ready(() => {
-  // Setup - add a text input to each footer cell
-  $('#{{ table_id }} thead tr')
-    .clone(true)
-    .addClass('filters')
-    .appendTo('#{{ table_id }} thead');
-
-  $('#{{ table_id }}').DataTable({
-    sDom: 'lrtip', // removes search box while still allowing search
-    searching: true,
-    order: [], // Prevent auto sorting
-    pageLength: 30,
-    orderCellsTop: true,
-    fixedHeader: true,
-    {{datatables_params}}
-    initComplete: onInit,
-  });
-});
+})();
 </script> 
