@@ -18,7 +18,7 @@ JS_RESOURCES = [
     'jquery.dataTables.min.js']
 CSS_RESOURCES = [
     'bootstrap.min.css', 'simple-datatables_latest.css',
-    'font-awesome_5.0.8.css', 'jquery.dataTables.min.css']
+    'jquery.dataTables.min.css']
 FILT_TABLE_RESOURCES = [
     'filterable_table_template.css', 'filterable_table_template.js']
 
@@ -228,7 +228,7 @@ class HTMLReport(HTMLSection):
 
         template = pkg_resources.resource_filename(
             __package__, 'data/report_template.html')
-        with open(template, 'r') as fh:
+        with open(template, 'r', encoding="UTF-8") as fh:
             template = fh.read()
         self.template = Template(template)
 
@@ -258,7 +258,7 @@ class HTMLReport(HTMLSection):
             for res in resources:
                 fn = pkg_resources.resource_filename(
                     __package__, 'data/{}'.format(res))
-                with open(fn) as fh:
+                with open(fn, encoding="UTF-8") as fh:
                     libs.append(stub.format(fh.read()))
 
         all_scripts = list()
@@ -429,7 +429,7 @@ class FilterableTable:
         for res in FILT_TABLE_RESOURCES:
             fn = pkg_resources.resource_filename(
                 __package__, 'data/{}'.format(res))
-            with open(fn, 'r') as fh:
+            with open(fn, 'r', encoding="UTF-8") as fh:
                 temp_part = fh.read()
                 template += temp_part
         return template
