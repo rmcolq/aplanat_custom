@@ -13,14 +13,7 @@ develop: venv/bin/activate
 	${IN_VENV} && python setup.py develop
 
 test: venv/bin/activate
-	${IN_VENV} && pip install flake8 flake8-rst-docstrings flake8-docstrings flake8-import-order
-	${IN_VENV} \
-		&& rm -rf flake8-forbid-visual-indent \
-		&& git clone https://github.com/ateraz/flake8-forbid-visual-indent \
-		&& cd flake8-forbid-visual-indent \
-		&& pip install . \
-		&& cd .. \
-		&& rm  -rf flake8-forbid-visual-indent
+	${IN_VENV} && pip install flake8 flake8-rst-docstrings flake8-docstrings flake8-import-order flake8-forbid-visual-indent
 	${IN_VENV} && flake8 aplanat \
 		--import-order-style google --application-import-names aplanat \
 		--statistics
