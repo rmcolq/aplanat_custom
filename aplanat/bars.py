@@ -103,8 +103,8 @@ def boxplot_series(
         * p.xaxis.axis_label = 'Read Length / bases'
         * p.yaxis.axis_label = 'Number of reads'
     """
-    df = pd.DataFrame(dict(
-       group=groups, value=values))
+    df = pd.DataFrame(
+        dict(group=groups, value=values))
     uniq = df.group.unique()
     # numeric or categorical
     if not np.issubdtype(uniq.dtype, np.number):

@@ -384,8 +384,9 @@ class PlotMappingStats(HTMLSection):
             y_axis_label='Count',
             tools=""
         )
-        plot.vbar(x=labels, top=counts,
-                  width=0.9, fill_color=Colors.light_cornflower_blue)
+        plot.vbar(
+            x=labels, top=counts,
+            width=0.9, fill_color=Colors.light_cornflower_blue)
         plot.xgrid.grid_line_color = None
         plot.y_range.start = 0
 

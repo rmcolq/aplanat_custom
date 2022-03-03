@@ -76,8 +76,9 @@ class HTMLSection(OrderedDict):
         """
         self._add_item(plot, key=key)
 
-    def table(self, data_frame, index=False, key=None, searchable=True,
-              paging=True, sortable=True, **kwargs):
+    def table(
+            self, data_frame, index=False, key=None, searchable=True,
+            paging=True, sortable=True, **kwargs):
         """Add a pandas dataframe to the report.
 
         :param df: pandas dataframe instance.
@@ -87,12 +88,13 @@ class HTMLSection(OrderedDict):
         :param kwargs:
                        https://github.com/fiduswriter/Simple-DataTables/wiki/API
         """
-        table = Table(data_frame, index=index, searchable=searchable,
-                      paging=paging, sortable=sortable, **kwargs)
+        table = Table(
+            data_frame, index=index, searchable=searchable,
+            paging=paging, sortable=sortable, **kwargs)
         self._add_item(table, key=key)
 
-    def filterable_table(self, data_frame, index=False, key=None,
-                         table_params=None):
+    def filterable_table(
+            self, data_frame, index=False, key=None, table_params=None):
         """Add a filterable table report component.
 
         :param data_frame: pandas dataframe instance.
@@ -102,8 +104,8 @@ class HTMLSection(OrderedDict):
             e.g.:  the following sets column 2 and 4 to 5% width,
             columnDefs: [ { "width": "5%", "targets": [2, 4] }]
         """
-        table = FilterableTable(data_frame, index=index,
-                                table_params=table_params)
+        table = FilterableTable(
+            data_frame, index=index, table_params=table_params)
         self._add_item(table.div, key=key)
 
     def markdown(self, text, key=None):

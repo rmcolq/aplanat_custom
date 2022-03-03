@@ -162,11 +162,12 @@ def emptyPlot(**kwargs):
         plot_height=300,
         **kwargs
     )
-    failLabel = Label(x=125, y=125, x_units='screen',
-                      y_units='screen',
-                      text=str('Failed to plot'),
-                      text_font_style='italic',
-                      text_align='center')
+    failLabel = Label(
+        x=125, y=125, x_units='screen',
+        y_units='screen',
+        text=str('Failed to plot'),
+        text_font_style='italic',
+        text_align='center')
 
     p.circle([1, 2], [3, 4], fill_color='white', line_color='white')
     p.add_layout(failLabel)

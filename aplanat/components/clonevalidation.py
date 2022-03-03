@@ -184,8 +184,9 @@ class CloneValidationQC(HTMLSection):
                     print(line)
                     raise IOError("Cannot read alignment file")
 
-        names = ['ref', 'rstart', 'rlen', 'rorient',
-                 'query', 'qstart', 'qlen', 'qorient']
+        names = [
+            'ref', 'rstart', 'rlen', 'rorient',
+            'query', 'qstart', 'qlen', 'qorient']
         df = pd.DataFrame(records, columns=names)
         df = df.loc[df['qorient'] == '+']
         for f in ['qstart', 'qlen', 'rstart', 'rlen']:
