@@ -36,7 +36,8 @@ def depth_coverage(depth_file, xlim=(None, None), ylim=(None, None), **kwargs):
     depth_file.columns = ['ref', 'start', 'end', 'depth']
     all_ref = dict(tuple(depth_file.groupby(['ref'])))
     plots = []
-    for ref, depths in all_ref.items():
+    for ref in sorted(all_ref):
+        depths = all_ref[ref]
         plot = lines.steps(
             list([depths['start']]), list([depths['depth']]),
             colors=[Colors.cerulean], mode='after',
@@ -68,7 +69,8 @@ def depth_coverage_orientation(
     depth_file['rev'] = rev_file['rev']
     all_ref = dict(tuple(depth_file.groupby(['ref'])))
     plots = []
-    for ref, depths in all_ref.items():
+    for ref in sorted(all_ref):
+        depths = all_ref[ref]
         plot = lines.steps(
             [list(depths['start']), list(depths['start'])],
             [list(depths['fwd']), list(depths['rev'])],
