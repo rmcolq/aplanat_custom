@@ -14,13 +14,9 @@ import markdown
 import pkg_resources
 
 JS_RESOURCES = [
-    'simple-datatables_latest.js', 'jquery-3.6.0.slim.min.js',
-    'jquery.dataTables.min.js']
+    'simple-datatables_latest.js']
 CSS_RESOURCES = [
-    'bootstrap.min.css', 'simple-datatables_latest.css',
-    'jquery.dataTables.min.css']
-FILT_TABLE_RESOURCES = [
-    'filterable_table_template.css', 'filterable_table_template.js']
+    'bootstrap.min.css', 'simple-datatables_latest.css']
 
 
 def _maybe_new_report(section, require_keys=False):
@@ -92,21 +88,6 @@ class HTMLSection(OrderedDict):
             data_frame, index=index, searchable=searchable,
             paging=paging, sortable=sortable, **kwargs)
         self._add_item(table, key=key)
-
-    def filterable_table(
-            self, data_frame, index=False, key=None, table_params=None):
-        """Add a filterable table report component.
-
-        :param data_frame: pandas dataframe instance.
-        :param index: include dataframe index in output.
-        :param key: unique key for item.
-        :param table_params: dict of params for DataTables
-            e.g.:  the following sets column 2 and 4 to 5% width,
-            columnDefs: [ { "width": "5%", "targets": [2, 4] }]
-        """
-        table = FilterableTable(
-            data_frame, index=index, table_params=table_params)
-        self._add_item(table.div, key=key)
 
     def markdown(self, text, key=None):
         """Add markdown formatted text to the report.
@@ -400,38 +381,3 @@ class Table():
         self.div = template.render(
             dataframe=data_frame.to_html(table_id=key, index=index),
             table_id=key, kwargs=kwargs)
-
-
-class FilterableTable:
-    """A table report component."""
-
-    def __init__(self, data_frame, index=False, table_params=None):
-        """Initialize table component.
-
-        :param dataframe: dataframe to turn in to filterable table.
-        :param index: whether to include index or not
-        :table params: dict of parameters for DataTables
-        """
-        template = Template(self._get_template())
-
-        key = str(uuid.uuid4()).replace('-', '')
-        key = "a{}".format(key[1:])
-
-        if table_params is None:
-            tp = ''
-        else:
-            tp = str(table_params).strip('{}')
-            tp = f"{tp},"
-        self.div = template.render(
-            dataframe=data_frame.to_html(table_id=key, index=index),
-            table_id=key, datatables_params=tp)
-
-    def _get_template(self):
-        template = ""
-        for res in FILT_TABLE_RESOURCES:
-            fn = pkg_resources.resource_filename(
-                __package__, 'data/{}'.format(res))
-            with open(fn, 'r', encoding="UTF-8") as fh:
-                temp_part = fh.read()
-                template += temp_part
-        return template

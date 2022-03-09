@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Fixed
-- Typo in top padding for title
-- Nextclade web component version bump to 1.0.2
+- Typo in top padding for title.
+- Nextclade web component version bump to 1.0.2.
+- Removed filterable table code.
 ### Added
 - Depth coverage graph component.
 
