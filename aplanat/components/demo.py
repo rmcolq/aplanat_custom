@@ -94,17 +94,6 @@ def main(args):
     df = pd.DataFrame({'x': y, 'y': x})
     report.table(df, key='Table with more data and pagination', height=200)
 
-    df['class'] = 'class1'
-    df.iloc[:5, df.columns.get_loc('class')] = 'class2'
-    df = df[['class', 'x', 'y']]
-    report.markdown(
-        "Here's a FilterableTable which allows column-based filtering")
-    data_tables_params = {
-        'columnDefs': [{'width': "10%", "targets": [0]}],
-        'pageLength': 10}
-    report.filterable_table(
-        df, key='Filterable table', table_params=data_tables_params)
-
     # boxplot series with discretised x
     logger.info("Adding boxplot")
     report.placeholder("boxplot preamble")
