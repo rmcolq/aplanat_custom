@@ -269,7 +269,7 @@ class WFReport(HTMLReport):
 
     def __init__(
             self, title, workflow, commit=None, revision=None,
-            require_keys=False):
+            require_keys=False, about=True):
         """Initialize the report item collection.
 
         :param workflow: workflow name (e.g. wf-hap-snps)
@@ -283,6 +283,7 @@ class WFReport(HTMLReport):
         self.wf_commit = commit
         self.wf_revision = revision
         self.workflow = workflow
+        self.about = about
         lead = (
             "Results generated through the {} Nextflow workflow "
             "provided by Oxford Nanopore Technologies.".format(workflow))
@@ -297,23 +298,25 @@ class WFReport(HTMLReport):
             del self.sections[self.tail_key]
         except KeyError:
             pass
-        self.add_section(key=self.tail_key).markdown("""
-### About
 
-This report was produced using the
-[epi2me-labs/{0}](https://github.com/epi2me-labs/{0}).  The
-workflow can be run using `nextflow epi2me-labs/{0} --help`
+        if self.about:
+            self.add_section(key=self.tail_key).markdown("""
+    ### About
 
-**Version details** *Revision*: {1} *Git Commit*: {2}
+    This report was produced using the
+    [epi2me-labs/{0}](https://github.com/epi2me-labs/{0}).  The
+    workflow can be run using `nextflow epi2me-labs/{0} --help`
 
-
-***Oxford Nanopore Technologies products are not intended for use for health
-assessment or to diagnose, treat, mitigate, cure or prevent any disease or
-condition.***
+    **Version details** *Revision*: {1} *Git Commit*: {2}
 
 
----
-""".format(self.workflow, self.wf_revision, self.wf_commit))
+    ***Oxford Nanopore Technologies products are not intended for use for
+    health assessment or to diagnose, treat, mitigate, cure or prevent any
+    disease or condition.***
+
+
+    ---
+    """.format(self.workflow, self.wf_revision, self.wf_commit))
         return super().render()
 
 
