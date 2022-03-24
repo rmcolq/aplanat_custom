@@ -17,7 +17,8 @@ The table below highlights versions of key software used within the analysis.
 """
 
 
-def version_table(versions, header=_version_header, report=None):
+def version_table(
+        versions, header=_version_header, report=None, th_color='#0084A9'):
     """Create a software version report from CSVs with information.
 
     :param versions: directory containing headerless CSVs with
@@ -50,7 +51,7 @@ def version_table(versions, header=_version_header, report=None):
         except Exception:
             logger.warning(f"Failed to read versions from: {fname}.")
     verdata = pd.DataFrame(verdata, columns=('Name', 'Version'))
-    report.table(verdata, index=False)
+    report.table(verdata, index=False, th_color=th_color)
     return report
 
 
@@ -61,7 +62,8 @@ The table below highlights values of the main parameters used in this analysis.
 """
 
 
-def params_table(params, header=_params_header, report=None):
+def params_table(
+        params, header=_params_header, report=None, th_color='#0084A9'):
     """Create a workflow parameter report from a JSON file.
 
     :param versions: Flat JSON file containing key, value pairs
@@ -82,7 +84,7 @@ def params_table(params, header=_params_header, report=None):
         data = json.load(f)
         params = [(k, v) for k, v in data.items()]
         df_params = pd.DataFrame(params, columns=['Key', 'Value'])
-        report.table(df_params, index=False)
+        report.table(df_params, index=False, th_color=th_color)
         return report
 
 
