@@ -7,6 +7,7 @@ from bokeh.models import Label
 from bokeh.plotting import figure
 import numpy as np
 import pandas as pd
+import pkg_resources
 from scipy import stats as sp_stats
 
 
@@ -63,6 +64,47 @@ class _colors:
 
 
 Colors = _colors()
+
+
+class _ontColors:
+    """ONT Brand colors."""
+
+    BRAND_BLUE = '#0084A9'
+    BRAND_BLUE_LIGHT = '#0084a91a'
+    BRAND_LIGHT_BLUE = '#90C6E7'
+    BRAND_BLACK = '#333333'
+    BRAND_LIGHT_GREY = '#B5AEA7'
+    BRAND_GREY = '#666666'
+    BRAND_GREY_LIGHT = '#6666661f'
+
+    BRAND_LOGO = pkg_resources.resource_filename(
+        __package__, 'data/ont_logo.txt')
+    with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
+        BRAND_LOGO = fh.read()
+
+
+ont_colors = _ontColors()
+
+
+class _ondColors:
+    """OND Brand colors."""
+
+    BRAND_BLUE = '#003E71'
+    BRAND_BLUE_LIGHT = '#003e7136'
+    BRAND_LIGHT_BLUE = '#90C6E7'
+    BRAND_BLACK = '#333333'
+    BRAND_LIGHT_GREY = '#B5AEA7'
+    BRAND_GREY = '#666666'
+    BRAND_GREY_LIGHT = '#6666661f'
+    BRAND_RED = '#f45b69'
+
+    BRAND_LOGO = pkg_resources.resource_filename(
+        __package__, 'data/ond_logo.txt')
+    with open(BRAND_LOGO, 'r', encoding="UTF-8") as fh:
+        BRAND_LOGO = fh.read()
+
+
+ond_colors = _ondColors()
 
 
 class Limiter(object):

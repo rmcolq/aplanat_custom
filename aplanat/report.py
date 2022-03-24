@@ -15,8 +15,6 @@ import pkg_resources
 
 JS_RESOURCES = [
     'simple-datatables_latest.js']
-CSS_RESOURCES = [
-    'bootstrap.min.css', 'simple-datatables_latest.css']
 
 
 def _maybe_new_report(section, require_keys=False):
@@ -196,7 +194,7 @@ class HTMLReport(HTMLSection):
     out of order addition.
     """
 
-    def __init__(self, title="", lead="", require_keys=False):
+    def __init__(self, title="", lead="", require_keys=False, style='ont'):
         """Initialize the report item collection.
 
         :param title: report title.
@@ -208,6 +206,15 @@ class HTMLReport(HTMLSection):
         self.lead = lead
         self.sections = OrderedDict()
         self.sections['main'] = self
+        self.style = style
+
+        self.CSS_RESOURCES = dict(
+                bootstrap='bootstrap.min.css',
+                datatables='simple-datatables_latest.css',
+                ont='custom-ont.css',
+                ond='custom-ond.css',
+                epi2me='custom-epi2me.css'
+        )
 
         template = pkg_resources.resource_filename(
             __package__, 'data/report_template.html')
@@ -235,6 +242,8 @@ class HTMLReport(HTMLSection):
         bokeh_resources = INLINE.render()
 
         libs = []
+        css_files = ['bootstrap', 'datatables', self.style]
+        CSS_RESOURCES = [self.CSS_RESOURCES[file] for file in css_files]
         for resources, stub in (
                 [CSS_RESOURCES, "<style>{}</style>"],
                 [JS_RESOURCES, '<script type="text/javascript">{}</script>']):
@@ -269,7 +278,7 @@ class WFReport(HTMLReport):
 
     def __init__(
             self, title, workflow, commit=None, revision=None,
-            require_keys=False, about=True):
+            require_keys=False, about=True, style='ont'):
         """Initialize the report item collection.
 
         :param workflow: workflow name (e.g. wf-hap-snps)
@@ -284,10 +293,13 @@ class WFReport(HTMLReport):
         self.wf_revision = revision
         self.workflow = workflow
         self.about = about
+        self.style = style
+
         lead = (
             "Results generated through the {} Nextflow workflow "
             "provided by Oxford Nanopore Technologies.".format(workflow))
-        super().__init__(title=title, lead=lead, require_keys=require_keys)
+        super().__init__(
+            title=title, lead=lead, require_keys=require_keys, style=style)
         self.tail_key = str(uuid.uuid4())
 
     def render(self):
@@ -333,7 +345,7 @@ def bokeh_table(df, index=True, **kwargs):
 class Table():
     """A table report component."""
 
-    def __init__(self, data_frame, index, **kwargs):
+    def __init__(self, data_frame, index, th_color='#0084A9', **kwargs):
         """Initialize table component.
 
         :param dataframe: dataframe to turn in to simple table.
@@ -356,7 +368,7 @@ class Table():
             padding-top: 4px;
             padding-bottom: 4px;
             text-align: left;
-            background-color: #0084A9 ;
+            background-color: """+th_color+""" ;
             color: white;
             }
             </style>
