@@ -55,11 +55,12 @@ def single_hbar(values, classes, colors, **kwargs):
 
 
 def simple_bar(
-        groups, counts, colors=None, **kwargs):
+        groups, counts, colors=util.Colors.cerulean, **kwargs):
     """Create a simple barplot.
 
     :param groups: the grouping variable (the x-axis values).
-    :param values: the data for bars are drawn (the y-axis values).
+    :param counts: the data for bars are drawn (the y-axis values).
+    :param colors: the bar color.
     :param kwargs: kwargs for bokeh figure.
 
     """
@@ -78,6 +79,32 @@ def simple_bar(
     p.xgrid.grid_line_color = None
     p.y_range.start = 0
     return p
+
+
+def simple_hbar(groups, counts, colors=util.Colors.cerulean, **kwargs):
+    """Create a simple horizontal barplot.
+
+    :param groups: the grouping variable (the y-axis values).
+    :param counts: the data for bars are drawn (the x-axis values).
+    :param colors: the bar color.
+    :param kwargs: kwargs for bokeh figure.
+
+    """
+    defaults = {
+        'output_backend': 'webgl',
+        'plot_height': 300, 'plot_width': 600}
+    defaults.update(kwargs)
+    fig = figure(**defaults)
+    y = list(range(len(groups)))
+    fig.hbar(y, right=counts, height=0.5, line_color=colors, fill_color=colors)
+    # Override the numerical labels with categories.
+    # Setting labels this way, rather than with figure(y_range= ...)
+    # ensures that category labels align with bars.
+    fig.yaxis.ticker = y
+    mapper = {k: v for (k, v) in zip(y, groups)}
+    fig.yaxis.major_label_overrides = mapper
+
+    return fig
 
 
 @util.plot_wrapper
