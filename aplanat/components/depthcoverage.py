@@ -5,6 +5,7 @@ import argparse
 
 from bokeh.layouts import gridplot, layout
 from bokeh.models import Panel, Tabs
+import numpy as np
 import pandas as pd
 
 from aplanat import lines
@@ -21,8 +22,56 @@ the output of [Mosdepth]
 """
 
 
+def cumulative_depth_from_dist(depth_file: str, **kwargs):
+    """Cumulative depth plots from mosdepth dist file.
+
+    param: depth_file: mosdepth.*.dist.txt file
+    """
+    df = pd.read_csv(
+        depth_file, sep='\t', names=['ref', 'coverage', 'proportion'])
+    df = df[df.ref == 'total']  # Use whole genome
+    df.coverage = df['coverage'].astype(int)
+    df.sort_values('coverage', ascending=True, inplace=True)
+    p = lines.line(
+        [df.coverage], [df.proportion],
+        x_axis_label='Read depth',
+        y_axis_label='Percentage of genome',
+        **kwargs)
+    return p
+
+
+def cumulative_depth_from_bed(df: pd.DataFrame, bins: int = 100, **kwargs):
+    """Cumulative depth plot from a mosdepth bed derived dataframe.
+
+    :param df: depth dataframe
+        Required columns:
+        - start
+        - end
+        - depth
+    :param: bins: number of bins for coverage
+    :param: kwargs: keyword arguments for aplanat.lines.line
+    """
+    df.sort_values('depth', ascending=True, inplace=True)
+    df['step'] = df.end - df.start
+    df['cumsum_step'] = df.step.cumsum()
+    x = df.depth.to_numpy()
+    binner = len(x) // bins
+    # Select slices from the depth-sorted array
+    x = x[1:-1:binner]                  # Coverage
+    y = np.array(list(range(len(x))))   # Proportion of genome
+    # Normalise y to percentage of genome
+    y = y / y[-1] * 100
+    y = np.flip(y)
+    p = lines.line(
+        [x], [y],
+        x_axis_label='Read depth',
+        y_axis_label='Percentage of genome',
+        **kwargs)
+    return p
+
+
 def depth_coverage(depth_file, xlim=(None, None), ylim=(None, None), **kwargs):
-    """Create a cumulative depth coverage plot per ref name.
+    """Create plot of depth coverage by region per ref name.
 
     :param depth_file: depth file output from mosdepth
     :param xlim: tuple for plotting limits (start, end). A value None will
@@ -51,7 +100,7 @@ def depth_coverage(depth_file, xlim=(None, None), ylim=(None, None), **kwargs):
 
 def depth_coverage_orientation(
         fwd, rev, xlim=(None, None), ylim=(None, None), **kwargs):
-    """Create a cumulative depth coverage plot per ref name with fwd and rev.
+    """Create plot of depth coverage by region per ref name with fwd and rev.
 
     :param fwd: fwd depth file output from mosdepth
     :param rev: rev depth file output from mosdepth
