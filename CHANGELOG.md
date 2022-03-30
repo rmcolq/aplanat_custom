@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom ONT/OND css for reports
 - Custom ONT/OND color classes
 - Added ability to turn off about section
+- Cumulative depth plots
 
 ## [v0.6.3]
 ### Fixed
