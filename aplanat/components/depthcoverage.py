@@ -25,13 +25,17 @@ the output of [Mosdepth]
 def cumulative_depth_from_dist(depth_file: str, **kwargs):
     """Cumulative depth plots from mosdepth dist file.
 
-    param: depth_file: mosdepth.*.dist.txt file
+    :param: depth_file: mosdepth.*.dist.txt file
+    :param: bins: number of bins to plot
     """
     df = pd.read_csv(
         depth_file, sep='\t', names=['ref', 'coverage', 'proportion'])
-    df = df[df.ref == 'total']  # Use whole genome
-    df.coverage = df['coverage'].astype(int)
+    # Use whole genome: 'total'
+    df = df[df.ref == 'total']
     df.sort_values('coverage', ascending=True, inplace=True)
+    df.proportion = df.proportion * 100
+    df.drop_duplicates('proportion', inplace=True)
+
     p = lines.line(
         [df.coverage], [df.proportion],
         x_axis_label='Read depth',
@@ -40,7 +44,7 @@ def cumulative_depth_from_dist(depth_file: str, **kwargs):
     return p
 
 
-def cumulative_depth_from_bed(df: pd.DataFrame, bins: int = 100, **kwargs):
+def cumulative_depth_from_bed(df: pd.DataFrame, bins: int = 2000, **kwargs):
     """Cumulative depth plot from a mosdepth bed derived dataframe.
 
     :param df: depth dataframe
@@ -50,20 +54,24 @@ def cumulative_depth_from_bed(df: pd.DataFrame, bins: int = 100, **kwargs):
         - depth
     :param: bins: number of bins for coverage
     :param: kwargs: keyword arguments for aplanat.lines.line
+    :param: bins: number of bins to plot
     """
     df.sort_values('depth', ascending=True, inplace=True)
     df['step'] = df.end - df.start
-    df['cumsum_step'] = df.step.cumsum()
+    df['cum_step'] = df.step.cumsum()
     x = df.depth.to_numpy()
-    binner = len(x) // bins
-    # Select slices from the depth-sorted array
-    x = x[1:-1:binner]                  # Coverage
-    y = np.array(list(range(len(x))))   # Proportion of genome
+    y = df.cum_step.to_numpy()
+
     # Normalise y to percentage of genome
-    y = y / y[-1] * 100
-    y = np.flip(y)
+    y = (y / y[-1]) * 100
+    # Select slices
+    binner = np.linspace(0, len(df) - 1, bins).astype(int)
+    x_bin = np.array(x)[binner]
+    y_bin = np.array(y)[binner]
+
+    y_bin = np.flip(y_bin)
     p = lines.line(
-        [x], [y],
+        [x_bin], [y_bin],
         x_axis_label='Read depth',
         y_axis_label='Percentage of genome',
         **kwargs)
