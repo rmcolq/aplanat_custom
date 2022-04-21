@@ -26,7 +26,6 @@ def cumulative_depth_from_dist(depth_file: str, **kwargs):
     """Cumulative depth plots from mosdepth dist file.
 
     :param: depth_file: mosdepth.*.dist.txt file
-    :param: bins: number of bins to plot
     """
     df = pd.read_csv(
         depth_file, sep='\t', names=['ref', 'coverage', 'proportion'])
@@ -52,24 +51,36 @@ def cumulative_depth_from_bed(df: pd.DataFrame, bins: int = 2000, **kwargs):
         - start
         - end
         - depth
-    :param: bins: number of bins for coverage
-    :param: kwargs: keyword arguments for aplanat.lines.line
     :param: bins: number of bins to plot
+    :param: kwargs: keyword arguments for aplanat.lines.line
     """
-    df.sort_values('depth', ascending=True, inplace=True)
+    # Count bases covered by each "step" in the BED
     df['step'] = df.end - df.start
-    df['cum_step'] = df.step.cumsum()
-    x = df.depth.to_numpy()
-    y = df.cum_step.to_numpy()
 
-    # Normalise y to percentage of genome
-    y = (y / y[-1]) * 100
-    # Select slices
-    binner = np.linspace(0, len(df) - 1, bins).astype(int)
-    x_bin = np.array(x)[binner]
-    y_bin = np.array(y)[binner]
+    # * Merge steps with the same depth together for total per-depth base count
+    # * Sort descending to count cumulatively as coverage decreases
+    #   ie. the proportion of counted bases approaches 1 as we reach 0 cov
+    df_agg = df.groupby("depth") \
+        .agg({"step": "sum"}) \
+        .sort_values("depth", ascending=False)
+    df_agg["step_cumsum"] = df_agg.step.cumsum()
+    df_agg["percent_at_depth"] = \
+        df_agg.step_cumsum / df_agg.step_cumsum.max() * 100
 
-    y_bin = np.flip(y_bin)
+    # Flip table to correct axes
+    df_agg = df_agg[::-1]
+
+    # Select slices (depths are accessed by .index)
+    x = df_agg.index.to_numpy()
+    y = df_agg.percent_at_depth.to_numpy()
+    if len(x) > bins:
+        binner = np.linspace(0, len(df_agg) - 1, bins).astype(int)
+        x_bin = np.array(x)[binner]
+        y_bin = np.array(y)[binner]
+    else:
+        x_bin = x
+        y_bin = y
+
     p = lines.line(
         [x_bin], [y_bin],
         x_axis_label='Read depth',
