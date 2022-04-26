@@ -33,20 +33,6 @@
     /* Pink */
     --brand-pink: #A60067;
 
-
-    /* --ont-dark-grey: #455560;
-    --ont-light-grey: #B5AEA7;
-    --ont-grey: #666666;
-    --ont-grey-l: #6666661f;
-    --ond-blue: #003E71;
-    --ond-blue-m: #003e71a6;
-    --ond-blue-l: #003e7136;
-    --secondary-blue: #006271;
-    --ond-red: #f45b69;
-    --ond-red-m: #f45b69a6;
-    --ond-green: #8FC93A;
-    --ond-pink: #A60067;
-    --ond-crimson: #D7263D; */
 }
 
 /* For printing */
@@ -133,7 +119,7 @@ input[type='checkbox']{
   color: #ffffff;
 }
 
-.badge-brand-blue {
+.badge-brand-primary {
   background-color: var(--brand-primary);
   color: #ffffff;
 }
@@ -205,7 +191,7 @@ input[type='checkbox']{
 
 }
 
-.alert-brand-blue {
+.alert-brand-primary {
     border-color: var(--brand-primary);
     background-color: var(--brand-primary);
     color: #ffffff;
@@ -213,7 +199,7 @@ input[type='checkbox']{
 
 }
 
-.alert-brand-blue-l {
+.alert-brand-primary-l {
     border-color: var(--brand-primary-l);
     background-color: var(--brand-primary-l);
     color: #ffffff;
@@ -237,7 +223,7 @@ input[type='checkbox']{
 
 /* Tables */
 
-.td-brand-blue {
+.td-brand-primary {
   border-color: var(--brand-primary);
   background-color: var(--brand-primary-l);
 }
