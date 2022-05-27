@@ -114,7 +114,7 @@ _full_report_header = """
 ### Read summary
 
 The following tables and figures are derived from
-the output of [fastcat](https://github.com/epi2me-labs/fastcat)`.
+the output of [fastcat](https://github.com/epi2me-labs/fastcat).
 """
 
 
