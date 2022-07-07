@@ -26,7 +26,10 @@ def read_length_plot(
     (not filter the data).
     """
     total_bases = seq_summary['read_length'].sum()
-    mean_length = total_bases / len(seq_summary)
+    try:
+        mean_length = total_bases / len(seq_summary)
+    except ZeroDivisionError:
+        mean_length = 0
     median_length = np.median(seq_summary['read_length'])
     datas = [seq_summary['read_length']]
     length_hist = hist.histogram(
