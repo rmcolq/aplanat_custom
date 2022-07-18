@@ -278,7 +278,7 @@ class WFReport(HTMLReport):
 
     def __init__(
             self, title, workflow, commit=None, revision=None,
-            require_keys=False, about=True, style='ont'):
+            require_keys=False, about=True, style='ont', lead=None):
         """Initialize the report item collection.
 
         :param workflow: workflow name (e.g. wf-hap-snps)
@@ -295,9 +295,11 @@ class WFReport(HTMLReport):
         self.about = about
         self.style = style
 
-        lead = (
-            "Results generated through the {} Nextflow workflow "
-            "provided by Oxford Nanopore Technologies.".format(workflow))
+        if lead is None:
+            lead = (
+                "Results generated through the {} Nextflow workflow "
+                "provided by Oxford Nanopore Technologies.".format(workflow))
+
         super().__init__(
             title=title, lead=lead, require_keys=require_keys, style=style)
         self.tail_key = str(uuid.uuid4())
