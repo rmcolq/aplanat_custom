@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Changed
 - title lead can be customised
+- enable html escaping to be turned off in the table function 
 
 ## [v0.6.10]
 ### Fixed
