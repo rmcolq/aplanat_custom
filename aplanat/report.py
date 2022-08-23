@@ -347,7 +347,9 @@ def bokeh_table(df, index=True, **kwargs):
 class Table():
     """A table report component."""
 
-    def __init__(self, data_frame, index, th_color='#0084A9', **kwargs):
+    def __init__(
+            self,
+            data_frame, index, th_color='#0084A9', escape=True, **kwargs):
         """Initialize table component.
 
         :param dataframe: dataframe to turn in to simple table.
@@ -396,5 +398,6 @@ class Table():
         # html id must not begin with numeric
 
         self.div = template.render(
-            dataframe=data_frame.to_html(table_id=key, index=index),
+            dataframe=data_frame.to_html(
+                table_id=key, index=index, escape=escape),
             table_id=key, kwargs=kwargs)
