@@ -1,6 +1,6 @@
 # aplanat requirements. 
 # Add comments to keep track of why we are using particular versions
-bokeh
+bokeh<3.0.0
 icon_font_to_png
 markdown
 numpy
