@@ -19,7 +19,7 @@ requirements:
     - pip
     - python
   run:
-    - bokeh < 3.0.0
+    - bokeh<3.0.0
     - icon_font_to_png
     - markdown
     - numpy
