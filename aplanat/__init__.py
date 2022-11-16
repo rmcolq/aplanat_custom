@@ -11,7 +11,7 @@ import bokeh.io as bkio
 from bokeh.layouts import gridplot
 from bokeh.plotting import Figure
 
-__version__ = "0.6.14"
+__version__ = "0.6.15"
 
 # we don't run a comprehensive test suite and mostly in notebooks,
 # so show warnings all the time.
