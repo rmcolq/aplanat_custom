@@ -123,8 +123,9 @@ class Limiter(object):
         :param data: new data to analyse.
 
         """
-        self.min = min(self.min, min(data))
-        self.max = max(self.max, max(data))
+        if len(data) > 0:
+            self.min = min(self.min, min(data))
+            self.max = max(self.max, max(data))
         return self
 
     def fix(self, lower=None, upper=None):
