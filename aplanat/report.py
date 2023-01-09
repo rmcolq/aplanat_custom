@@ -72,7 +72,7 @@ class HTMLSection(OrderedDict):
 
     def table(
             self, data_frame, index=False, key=None, searchable=True,
-            paging=True, sortable=True, **kwargs):
+            paging=True, sortable=True, formating=None, classes=None, **kwargs):
         """Add a pandas dataframe to the report.
 
         :param df: pandas dataframe instance.
@@ -84,7 +84,7 @@ class HTMLSection(OrderedDict):
         """
         table = Table(
             data_frame, index=index, searchable=searchable,
-            paging=paging, sortable=sortable, **kwargs)
+            paging=paging, sortable=sortable, formating=formating, classes=classes, **kwargs)
         self._add_item(table, key=key)
 
     def markdown(self, text, key=None):
@@ -187,16 +187,14 @@ class HTMLSection(OrderedDict):
 
 class HTMLReport(HTMLSection):
     """Generate HTML Report from a series of bokeh figures.
-
     Items added to the report take an optional key argument, adding items
     with the same key allows an update in place whilst maintaining the order
     in which items were added. Items can be grouped into sections for easier
     out of order addition.
     """
 
-    def __init__(self, title="", lead="", require_keys=False, style='ont'):
+    def __init__(self, title="", lead="", report_template="", logo=None, require_keys=False, style='ont'):
         """Initialize the report item collection.
-
         :param title: report title.
         :param lead: report strapline, shown below title.
         :param require_keys: require keys when adding items.
@@ -207,29 +205,27 @@ class HTMLReport(HTMLSection):
         self.sections = OrderedDict()
         self.sections['main'] = self
         self.style = style
+        self.logo = logo
 
         self.CSS_RESOURCES = dict(
                 bootstrap='bootstrap.min.css',
                 datatables='simple-datatables_latest.css',
                 ont='custom-ont.css',
                 ond='custom-ond.css',
-                epi2me='custom-epi2me.css'
+                epi2me='custom-epi2me.css',
+                UoS='custom-UoS.css'
         )
 
-        template = pkg_resources.resource_filename(
-            __package__, 'data/report_template.html')
+        template = report_template
         with open(template, 'r', encoding="UTF-8") as fh:
             template = fh.read()
         self.template = Template(template)
 
     def add_section(self, key=None, section=None, require_keys=False):
         """Add a section (grouping of items) to the report.
-
         :param key: unique key for section.
         :param section: `HTMLSection` to add rather than creating anew.
-
         :returns: the report section.
-
         """
         if key is None:
             key = str(uuid.uuid4())
@@ -262,8 +258,13 @@ class HTMLReport(HTMLSection):
 
         script = '\n'.join(all_scripts)
         divs = '\n'.join(all_divs)
+
+        if self.logo is not None:
+            with open(self.logo, 'r', encoding="UTF-8") as fh:
+                self.logo = "data:image/png;base64,"+fh.read()
+
         return self.template.render(
-            title=self.title, lead=self.lead,
+            title=self.title, lead=self.lead, logo=self.logo,
             bokeh_resources=bokeh_resources, resources="\n".join(libs),
             script=script, div=divs)
 
@@ -273,15 +274,14 @@ class HTMLReport(HTMLSection):
             outfile.write(self.render())
 
 
-class WFReport(HTMLReport):
-    """Report template for epi2me-labs/wf* workflows."""
+class UoSReport(HTMLReport):
+    """Report template for Sheffield Bioinformatics NanoCLUST workflow."""
 
     def __init__(
-            self, title, workflow, commit=None, revision=None,
-            require_keys=False, about=True, style='ont', lead=None):
+            self, title, report_template, workflow=None, commit=None, revision=None,
+            require_keys=False, about=True, style='UoS', logo=None):
         """Initialize the report item collection.
-
-        :param workflow: workflow name (e.g. wf-hap-snps)
+        :param workflow: workflow name (eg. NanoCLUST)
         :param title: report title.
         :param require_keys: require keys when adding items.
         """
@@ -289,19 +289,17 @@ class WFReport(HTMLReport):
             commit = "unknown"
         if revision is None:
             revision = "unknown"
-        self.wf_commit = commit
-        self.wf_revision = revision
+        self.commit = commit
+        self.revision = revision
         self.workflow = workflow
         self.about = about
         self.style = style
 
-        if lead is None:
-            lead = (
-                "Results generated through the {} Nextflow workflow "
-                "provided by Oxford Nanopore Technologies.".format(workflow))
-
+        lead = (
+            "Results generated through the {} Nextflow workflow "
+            "provided by UoS Bioinformatics.".format(workflow))
         super().__init__(
-            title=title, lead=lead, require_keys=require_keys, style=style)
+            title=title, lead=lead, report_template=report_template, logo=logo, require_keys=require_keys, style=style)
         self.tail_key = str(uuid.uuid4())
 
     def render(self):
@@ -316,21 +314,12 @@ class WFReport(HTMLReport):
         if self.about:
             self.add_section(key=self.tail_key).markdown("""
     ### About
-
     This report was produced using the
-    [epi2me-labs/{0}](https://github.com/epi2me-labs/{0}).  The
-    workflow can be run using `nextflow epi2me-labs/{0} --help`
-
+    [sheffield-bioinformatics-core/{0}](https://github.com/sheffield-bioinformatics-core/{0}).  The
+    workflow can be run using `nextflow sheffield-bioinformatics-core/{0} --help`
     **Version details** *Revision*: {1} *Git Commit*: {2}
-
-
-    ***Oxford Nanopore Technologies products are not intended for use for
-    health assessment or to diagnose, treat, mitigate, cure or prevent any
-    disease or condition.***
-
-
     ---
-    """.format(self.workflow, self.wf_revision, self.wf_commit))
+    """.format(self.workflow, self.revision, self.commit))
         return super().render()
 
 
@@ -349,7 +338,7 @@ class Table():
 
     def __init__(
             self,
-            data_frame, index, th_color='#0084A9', escape=True, **kwargs):
+            data_frame, index, th_color='#0084A9', escape=True, formating=None, classes=None, **kwargs):
         """Initialize table component.
 
         :param dataframe: dataframe to turn in to simple table.
@@ -361,6 +350,7 @@ class Table():
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
+            {{formating}}
             }
             #{{ table_id }} td, #{{ table_id }} th {
             border: 1px solid #ddd;
@@ -399,5 +389,5 @@ class Table():
 
         self.div = template.render(
             dataframe=data_frame.to_html(
-                table_id=key, index=index, escape=escape),
-            table_id=key, kwargs=kwargs)
+                table_id=key, index=index, escape=escape, classes=classes),
+            table_id=key, formating=formating, kwargs=kwargs)
