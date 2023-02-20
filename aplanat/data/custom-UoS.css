@@ -47,6 +47,14 @@
     .navbar-toggle {
         display:none;
     }
+
+    .dataTable-top {
+        display:none !important;
+    }
+
+    .dataTable-bottom {
+        display:none !important;
+    }
 }
 
 
