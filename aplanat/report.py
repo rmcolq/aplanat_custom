@@ -294,6 +294,7 @@ class CustomReport(HTMLReport):
         self.workflow = workflow
         self.about = about
         self.style = style
+        self.provider = provider
 
         lead = (
             "Results generated through the {0} Nextflow workflow "
