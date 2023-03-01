@@ -213,7 +213,7 @@ class HTMLReport(HTMLSection):
                 ont='custom-ont.css',
                 ond='custom-ond.css',
                 epi2me='custom-epi2me.css',
-                UoS='custom-UoS.css'
+                wf='custom-wf.css'
         )
 
         template = report_template
@@ -274,14 +274,14 @@ class HTMLReport(HTMLSection):
             outfile.write(self.render())
 
 
-class UoSReport(HTMLReport):
-    """Report template for Sheffield Bioinformatics NanoCLUST workflow."""
+class CustomReport(HTMLReport):
+    """Report template for custom workflow."""
 
     def __init__(
             self, title, report_template, workflow=None, commit=None, revision=None,
-            require_keys=False, about=True, style='UoS', logo=None):
+            require_keys=False, about=True, style='wf', logo=None, provider=None):
         """Initialize the report item collection.
-        :param workflow: workflow name (eg. NanoCLUST)
+        :param workflow: workflow name (eg. MyCustomWorkflow)
         :param title: report title.
         :param require_keys: require keys when adding items.
         """
@@ -296,8 +296,8 @@ class UoSReport(HTMLReport):
         self.style = style
 
         lead = (
-            "Results generated through the {} Nextflow workflow "
-            "provided by UoS Bioinformatics.".format(workflow))
+            "Results generated through the {0} Nextflow workflow "
+            "provided by {1}.".format(workflow, provider))
         super().__init__(
             title=title, lead=lead, report_template=report_template, logo=logo, require_keys=require_keys, style=style)
         self.tail_key = str(uuid.uuid4())
@@ -315,11 +315,11 @@ class UoSReport(HTMLReport):
             self.add_section(key=self.tail_key).markdown("""
     ### About
     This report was produced using the
-    [sheffield-bioinformatics-core/{0}](https://github.com/sheffield-bioinformatics-core/{0}).  The
-    workflow can be run using `nextflow sheffield-bioinformatics-core/{0} --help`
-    **Version details** *Revision*: {1} *Git Commit*: {2}
+    [{0}/{1}](https://github.com/{0}/{1}).  The
+    workflow can be run using `nextflow {0}/{1} --help`
+    **Version details** *Revision*: {2} *Git Commit*: {3}
     ---
-    """.format(self.workflow, self.revision, self.commit))
+    """.format(self.provider, self.workflow, self.revision, self.commit))
         return super().render()
 
 

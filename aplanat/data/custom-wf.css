@@ -1,15 +1,15 @@
 :root {
 
     /* ONT blue */
-    --brand-primary: #0084a9;
-    --brand-primary-m: #0084a9a6;
-    --brand-primary-l: #0084a91a;
+    --brand-primary: #4CB399;
+    --brand-primary-m: #4CB399a6;
+    --brand-primary-l: #4CB3991a;
 
     /* ONT secondary blue  */
-    --brand-secondary: #90C6E7;
+    --brand-secondary: #357d6b;
 
     /* ONT tertiary blue */
-    --brand-tertiary: #006271;
+    --brand-tertiary: #1e473d;
 
     /* ONT black */
     --brand-black: #333333;
@@ -25,14 +25,14 @@
     --brand-light-grey: #B5AEA7;
 
     /* Red */
-    --brand-red: #BC4B51;
-    --brand-red-m: #BC4B51a6;
+    --brand-red: #EE5727;
+    --brand-red-m: #EE5727a6;
 
     /* Green */
-    --brand-green: #8CB369;
+    --brand-green: #5C9665;
 
     /* Pink */
-    --brand-pink: #A60067;
+    --brand-pink: #ffa96a;
 
 }
 
@@ -59,7 +59,7 @@
 
 
 body {
-  font-family: 'Arial', sans-serif;!important
+  font-family: 'Helvetica', sans-serif;!important
 }
 
 /* Navigation */
@@ -74,7 +74,7 @@ body {
 /* Text */
 
 strong {
-  font-family:'Arial';
+  font-family:'Helvetica';
   font-weight: 700;
   font-style: normal;
 }
