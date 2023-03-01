@@ -289,6 +289,10 @@ class CustomReport(HTMLReport):
             commit = "unknown"
         if revision is None:
             revision = "unknown"
+        if workflow is None:
+            workflow = "unknown"
+        if provider is None:
+            provider = "unknown"
         self.commit = commit
         self.revision = revision
         self.workflow = workflow
